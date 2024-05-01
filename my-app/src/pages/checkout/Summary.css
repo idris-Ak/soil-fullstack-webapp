@@ -1,0 +1,51 @@
+/* Summary.css */
+.summary-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+  }
+  
+  .summary-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .summary-ordered-items {
+    margin-top: 20px;
+  }
+  
+  .summary-item {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+  }
+  
+  .summary-name {
+    font-weight: bold;
+  }
+  
+  .summary-confirmation-message {
+    margin-top: 20px;
+    text-align: center;
+  }
+  
+  .summary-back-btn {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .summary-back-btn:hover {
+    background-color: #45a049;
+  }
+  

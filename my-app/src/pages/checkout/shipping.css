@@ -1,0 +1,99 @@
+.shipping-container {
+    max-width: 40rem;
+    padding: 5vw 2rem 0;
+    margin: 0 auto;
+    height: 75vh;
+    border-radius: 47px;
+    background: #e0e0e0;
+    box-shadow:  -35px -35px 70px #7d7d7d,
+                 35px 35px 70px #ffffff;  }
+  
+  .shipping-form {
+    display: grid;
+    grid-gap: 1rem;
+  }
+  .separator {
+    display: flex;
+    align-items: center;
+}
+
+.separator hr {
+    flex-grow: 1;
+    border: none;
+    border-top: 1px solid #000;
+    margin: 0 1rem;
+}
+
+  .shipping-field {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #000000;
+    background-color: rgb(255, 255, 255);
+    padding: .5rem;
+    border-radius: .25rem;
+  }
+  
+  .shipping-field__label {
+    color: var(--color-gray);
+    font-size: 0.6rem;
+    font-weight: 300;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem
+  }
+  
+  .shipping-field__input {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    outline: 0;
+    font-weight: bold;
+    font-size: 1rem;
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: transparent;
+  }
+  
+  .shipping-field:focus-within {
+    border-color: #000;
+  }
+  
+  .shipping-fields {
+    display: grid;
+    grid-gap: 1rem;
+  }
+  
+  .shipping-fields--2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .shipping-fields--3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  
+  .shipping-button {
+    background-color: #000;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: block;
+    color: #fff;
+    width: 100%;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    border: 0;
+    cursor: pointer;
+    outline: 0;
+  }
+  
+  .shipping-button:focus-visible {
+    background-color: #333;
+  }
+  
+  .error-message{
+    padding: 5px;
+    background-color: #f44336; /* Red background color */
+    color: white; /* White text color */
+    border-radius: 5px;
+}
