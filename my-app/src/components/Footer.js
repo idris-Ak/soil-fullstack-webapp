@@ -13,7 +13,7 @@ function Footer() {
             <p>Address: 123 Soil Street, Melbourne, VIC 3000</p>
           </div>
           <div className="col-md-4">
-            <h5 style={{fontFamily:'Open Sans, sans-serif'}}>Follow Us</h5>
+            <h5 style={{fontFamily:'Open Sans, sans-serif'}}>Follow Us </h5>
             <ul className="list-unstyled">
               {/*<a href="https://www.flaticon.com/free-icons/facebook" title="facebook icons">Facebook icons created by Freepik - Flaticon</a>*/}
               <li>  
