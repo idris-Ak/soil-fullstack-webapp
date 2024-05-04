@@ -15,13 +15,28 @@ db.sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
 // exapamples below
 // db.user = require("./models/user.js")(db.sequelize, DataTypes);
 db.user = require("./models/user.js")(db.sequelize, DataTypes);
-db.cart = require("./models/cart.js")(db.sequelize, DataTypes);
+db.admin = require("./models/admin.js")(db.sequelize, DataTypes);
+db.shoppingCart = require("./models/shoppingCart.js")(db.sequelize, DataTypes);
+db.cartItem = require("./models/cartItem.js")(db.sequelize, DataTypes);
 db.review = require("./models/review.js")(db.sequelize, DataTypes);
-db.products = require("./models/products.js")(db.sequelize, DataTypes);
+db.product = require("./models/product.js")(db.sequelize, DataTypes);
+db.adminActions = require("./models/adminActions.js")(db.sequelize, DataTypes);
+db.moderateReview = require("./models/moderateReview.js")(db.sequelize, DataTypes);
 
 // Relate the models
 // example of post and user below.
 // db.post.belongsTo(db.user, { foreignKey: { name: "username", allowNull: false } });
+db.user.hasOne(db.shoppingCart, { foreignKey: 'userID' });
+db.user.hasMany(db.review, { foreignKey: 'userID' });
+
+db.admin.hasMany(db.adminActions, { foreignKey: 'adminID' });
+db.admin.hasMany(db.moderateReview, { foreignKey: 'adminID' });
+
+db.shoppingCart.belongsTo(db.user, { foreignKey: 'userID' });
+db.shoppingCart.hasMany(db.cartItem, { foreignKey: 'cartID' });
+
+db.cartItem.belongsTo(db.shoppingCart, { foreignKey: 'cartID' });
+db.cartItem.belongsTo(db.product, { foreignKey: 'productID' });
 
 // Learn more about associations here: https://sequelize.org/master/manual/assocs.html
 

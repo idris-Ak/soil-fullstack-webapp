@@ -1,5 +1,5 @@
 module.exports = (express, app) => {
-  const controller = require("../controllers/cart.controller.js");
+  const controller = require("../controllers/cartItem.controller.js");
   const router = express.Router();
 
   // Select add all router methods (get, post, etc)
