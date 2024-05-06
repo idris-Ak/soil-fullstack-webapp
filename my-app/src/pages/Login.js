@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from "react-router-dom";
 import { Button, Form, Alert, Container } from 'react-bootstrap';
+import axios from 'axios'; 
 
 
 function Login({loginUser}) {
@@ -21,16 +22,13 @@ const handleChange = (event) => {
   }));
 }; 
 
-const handleSubmit = (event) => {
+const handleSubmit = async (event) => {
 event.preventDefault(); 
  //Reset alerts on form submission
  setShowSuccessAlert(false);
  setShowErrorMessage(false);
-//Get users from local storage 
-const users = JSON.parse(localStorage.getItem('users')) || [];
-const user = users.find(u => u.email === userDetails.email && u.password === userDetails.password);
-
-if(user){
+try {
+  await axios.post('http://localhost:4000/api/user/Login', userDetails);
   //Show success alert
   setShowSuccessAlert(true); 
   setTimeout(() => {
@@ -41,7 +39,7 @@ if(user){
       navigate('/MyProfile');
   }, 2500);
 }
-else{
+catch(error){
     //Update error message
     setErrorMessage('Email Address and/or password invalid, please try again.');
     setShowErrorMessage(true);

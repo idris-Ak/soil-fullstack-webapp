@@ -2,4 +2,5 @@
 
 ## ER Diagram
 - 'NN' stands for 'Not Null' 
+- 'U' stands for 'Unique'
 

@@ -8,7 +8,7 @@ const db = {
 // Create Sequelize.
 db.sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
   host: config.HOST,
-  dialect: config.DIALECT
+  dialect: config.DIALECT,
 });
 
 // Include models.
@@ -38,6 +38,18 @@ db.shoppingCart.hasMany(db.cartItem, { foreignKey: 'cartID' });
 db.cartItem.belongsTo(db.shoppingCart, { foreignKey: 'cartID' });
 db.cartItem.belongsTo(db.product, { foreignKey: 'productID' });
 
+db.product.hasMany(db.cartItem, { foreignKey: 'productID' });
+db.product.hasMany(db.review, { foreignKey: 'productID' });
+
+db.review.belongsTo(db.user, { foreignKey: 'userID' });
+db.review.belongsTo(db.product, { foreignKey: 'productID' });
+db.review.hasMany(db.moderateReview, { foreignKey: 'reviewID' });
+
+db.moderateReview.belongsTo(db.admin, { foreignKey: 'adminID' });
+db.moderateReview.belongsTo(db.review, { foreignKey: 'reviewID' });
+
+db.adminActions.belongsTo(db.admin, { foreignKey: 'adminID' });
+
 // Learn more about associations here: https://sequelize.org/master/manual/assocs.html
 
 // Include a sync option with seed data logic included.
@@ -48,15 +60,15 @@ db.sync = async () => {
   // Can sync with force if the schema has become out of date - note that syncing with force is a destructive operation.
   // await db.sequelize.sync({ force: true });
   
-  await seedData();
+  // await seedData();
 };
 
-async function seedData() {
-  const count = await db.user.count();
+// async function seedData() {
+//   const count = await db.user.count();
 
-  // Only seed data if necessary.
-  if(count > 0)
-    return;
+//   // Only seed data if necessary.
+//   if(count > 0)
+//     return;
 
   // below is an example of adding a user
 
@@ -67,6 +79,6 @@ async function seedData() {
 
   // hash = await argon2.hash("def456", { type: argon2.argon2id });
   // await db.user.create({ username: "shekhar", password_hash: hash, first_name: "Shekhar", last_name : "Kalra" });
-}
+// }
 
 module.exports = db;

@@ -3,8 +3,8 @@ module.exports = (express, app) => {
   const router = express.Router();
 
   // Select add all router methods (get, post, etc)
-  
-    // Add routes to server.
-    app.use("/api/user", router);
-
+  router.post('/SignUp', controller.SignUp);
+  router.post('/Login', controller.Login);
+  // Add routes to server.
+  app.use("/api/user", router);
 };

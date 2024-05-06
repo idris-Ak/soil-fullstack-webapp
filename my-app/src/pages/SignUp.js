@@ -1,14 +1,14 @@
 import React, { useState} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Form, Alert, Container} from 'react-bootstrap';
+import axios from 'axios'; 
 
 function SignUp({loginUser}) {
   const [user, setUser] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    dateJoined: '' 
+    confirmPassword: ''
   });
   //These states are based upon the states from the Week 2 Full Stack Development lectorial code for cosc2758 semester 1, 2024
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
@@ -50,31 +50,25 @@ function SignUp({loginUser}) {
   };
 
   const handleSubmit = async(event) => {
-    event.preventDefault();
-    //Get the array of users from local storage 
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    //Check to see if email inputted is already registered or not 
-    if (users.some(u => u.email === user.email)) {
-      setErrorMessages(['The email is already registered.']);
+  event.preventDefault();
+  if(!validateForm()){
+    return;
+  }
+try{
+  await axios.post('http://localhost:4000/api/user/SignUp', user);
+  //Register user if validations pass
+   setShowSuccessAlert(true);
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+        loginUser(user);
+        navigate('/'); 
+      }, 3000);
+    }
+  catch (error) {
+      const message = error.response?.data.message || "An unexpected error occurred";
+      setErrorMessages([message]);
       setShowErrorMessage(true);
       setTimeout(() => setShowErrorMessage(false), 3000);
-      return;
-    }
-  //Register user if validations pass
-  if (validateForm()) {
-    //Add current date as date of joining
-    user.dateJoined = new Date().toLocaleDateString();
-    users.push(user);
-    localStorage.setItem('users', JSON.stringify(users));
-      //Show success alert
-      setShowSuccessAlert(true);
-      setTimeout(() => {
-          //Hide success alert after 3 seconds
-          setShowSuccessAlert(false); 
-          loginUser(user); 
-          //Navigate to home page after successful signup
-          navigate('/');
-      }, 3000);
     }
   };
 

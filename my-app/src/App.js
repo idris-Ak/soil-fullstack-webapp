@@ -17,6 +17,8 @@ import Checkout from './pages/checkout/Checkout'
 import Summary from './pages/checkout/Summary'
 import DietPlan from './pages/dietPlan'
 import { initItems } from './repository/shopItems'; //Import shop items and functions
+import axios from 'axios';
+
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -98,29 +100,34 @@ function App() {
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   useEffect(() => {
-    const currentUserEmail = localStorage.getItem('currentUserEmail');
-    if (currentUserEmail) {
-      //Get the array of users
-      const users = JSON.parse(localStorage.getItem('users')) || [];
-      //Check to see if user is registered or not by trying to find the user email inputted in the login email address field in local storage
-      const user = users.find(u => u.email === currentUserEmail);
-      if (user) {
-        //If the user already exists in local storage, set the current user to the one that just logged in and set the logged in state to true
-        setCurrentUser(user);
-        setIsLoggedIn(true);
+    const handleUserLoad = () => {
+      const userJSON = localStorage.getItem('user');
+      if (userJSON !== null && userJSON !== "undefined") { // Ensures the value is neither null nor the string "undefined"
+        try {
+          const user = JSON.parse(userJSON);
+          if (user) {
+            setCurrentUser(user);
+            setIsLoggedIn(true);
+          }
+        } catch (error) {
+          console.error('Error parsing user JSON from localStorage', error);
+        }
       }
-    }
+    };
+  
+    handleUserLoad();
   }, []);
 
-  const loginUser = (userDetails) => {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const user = users.find(u => u.email === userDetails.email);
-
-    if (user) {
-      //If the user exists in local storage, then log them in
-      localStorage.setItem('currentUserEmail', user.email);
-      setCurrentUser(user);
-      setIsLoggedIn(true);
+  const loginUser = async(userDetails) => {
+    try {
+      const response = await axios.post('http://localhost:4000/api/user/login', userDetails);
+      if (response.data) {
+        setCurrentUser(response.data.user);
+        setIsLoggedIn(true);
+        localStorage.setItem('user', JSON.stringify(response.data.user)); // Save user data to localStorage
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
     }
   };
 
@@ -128,7 +135,7 @@ function App() {
     setCurrentUser(null);
     setIsLoggedIn(false);
     //Remove the current user
-    localStorage.removeItem('currentUserEmail');
+    localStorage.removeItem('user');
     //Reset the meal plan to a blank state
     localStorage.setItem('mealPlan', JSON.stringify([]));
   };

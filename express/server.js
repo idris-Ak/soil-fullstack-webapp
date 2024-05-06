@@ -30,7 +30,9 @@ require("./src/routes/review.routes.js")(express, app);
 require("./src/routes/moderateReview.routes.js")(express, app);
 
 // Set port, listen for requests.
+db.sequelize.sync().then(() => {
 const PORT = 4000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
+});
 });
