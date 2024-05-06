@@ -5,24 +5,32 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         autoIncrement: true
       },
-      AdminID: {
+      adminID: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: 'admin',
+          model: 'admins',
           key: 'id'
         }
       },
-      ActionTaken: {
+      reviewID: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'reviews',
+        key: 'id'
+      }
+    },
+      ModerationActionTaken: {
         type: DataTypes.STRING,
         allowNull: false
       },
-      ActionTimeDate: {
+      ModerationActionDateAndTime: {
         type: DataTypes.DATE,
         allowNull: false
       }
     }, {
-      tableName: 'moderateReview'
+      tableName: 'moderateReviews'
     });
     return ModerateReview;
   };

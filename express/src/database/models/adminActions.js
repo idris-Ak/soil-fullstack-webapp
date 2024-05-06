@@ -5,23 +5,23 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       autoIncrement: true
     },
-    AdminID: {
+    adminID: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'admin',
+        model: 'admins',
         key: 'id'
       }
     },
-    Description: {
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    actionType: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    ActionType: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    ActionTimeDate: {
+    ActionDateAndTime: {
       type: DataTypes.DATE,
       allowNull: false
     }

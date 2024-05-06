@@ -5,30 +5,31 @@ module.exports = (sequelize, DataTypes) =>
       primaryKey: true,
       autoIncrement: true
     },
-    productId: {
+    productID: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'product',
+        model: 'products',
         key: 'id'
       }
     },
-    UserId: {
+    userID: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'user',
+        model: 'users',
         key: 'id'
       }
     },
-    numStar: {
-      type: DataTypes.ENUM('1', '2', '3', '4', '5'), // Define ENUM with allowed values 1-5
-      allowNull: false
+    numberOfStars: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      validate: { min: 1, max: 5 }
     },
-    description:{
-      type: DataTypes.STRING,
+     reviewText: {
+      type: DataTypes.TEXT,
       allowNull: false
     }
   }, {
-    tableName: 'review'
+    tableName: 'reviews'
   });
