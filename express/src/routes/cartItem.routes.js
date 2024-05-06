@@ -5,5 +5,5 @@ module.exports = (express, app) => {
   // Select add all router methods (get, post, etc)
 
   // Add routes to server.
-  app.use("/api/cart", router);
+  app.use("/api/cartItem", router);
 };
