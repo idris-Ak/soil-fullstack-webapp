@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from "react-router-dom";
 import { Button, Form, Alert, Container } from 'react-bootstrap';
-import axios from 'axios'; 
 
 
 function Login({loginUser}) {
@@ -28,7 +27,6 @@ event.preventDefault();
  setShowSuccessAlert(false);
  setShowErrorMessage(false);
 try {
-  await axios.post('http://localhost:4000/api/user/Login', userDetails);
   //Show success alert
   setShowSuccessAlert(true); 
   setTimeout(() => {

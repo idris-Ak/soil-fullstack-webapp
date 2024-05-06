@@ -99,43 +99,19 @@ function App() {
   
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
-  useEffect(() => {
-    const handleUserLoad = () => {
-      const userJSON = localStorage.getItem('user');
-      if (userJSON !== null && userJSON !== "undefined") { // Ensures the value is neither null nor the string "undefined"
-        try {
-          const user = JSON.parse(userJSON);
-          if (user) {
-            setCurrentUser(user);
-            setIsLoggedIn(true);
-          }
-        } catch (error) {
-          console.error('Error parsing user JSON from localStorage', error);
-        }
-      }
-    };
-  
-    handleUserLoad();
-  }, []);
-
-  const loginUser = async(userDetails) => {
+  const loginUser = async (userDetails) => {
     try {
-      const response = await axios.post('http://localhost:4000/api/user/login', userDetails);
-      if (response.data) {
-        setCurrentUser(response.data.user);
-        setIsLoggedIn(true);
-        localStorage.setItem('user', JSON.stringify(response.data.user)); // Save user data to localStorage
-      }
+      const response = await axios.post('http://localhost:4000/api/user/Login', userDetails);
+      setCurrentUser(response.data.user);
+      setIsLoggedIn(true);
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error('Login error:', error);
     }
   };
 
   const logoutUser = () => {
     setCurrentUser(null);
     setIsLoggedIn(false);
-    //Remove the current user
-    localStorage.removeItem('user');
     //Reset the meal plan to a blank state
     localStorage.setItem('mealPlan', JSON.stringify([]));
   };

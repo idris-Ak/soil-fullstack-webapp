@@ -28,7 +28,7 @@ exports.Login = async(req, res) => {
     try{
         const user = await db.user.findOne({where: {email}});
         if(user && await bcrypt.compare(password, user.password)) {
-            res.send({message: `Welcome ${user.name}!`});
+            res.send({ message: `Welcome ${user.name}!`, user: { id: user.id, name: user.name, email: user.email } });
         }
         else{
             res.status(401).send({message: "Invalid Email/Password"});

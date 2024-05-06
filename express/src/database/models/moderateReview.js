@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const ModerateReview = sequelize.define('moderateReview', {
+    const ModerateReview = sequelize.define('ModerateReview', {
       id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       }
     }, {
-      tableName: 'moderateReviews'
+      tableName: 'moderatereviews'
     });
     return ModerateReview;
   };
