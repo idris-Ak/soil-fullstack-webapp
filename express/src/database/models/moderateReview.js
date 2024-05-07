@@ -2,6 +2,7 @@ module.exports = (sequelize, DataTypes) => {
     const ModerateReview = sequelize.define('ModerateReview', {
       id: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         primaryKey: true,
         autoIncrement: true
       },

@@ -19,6 +19,7 @@ db.admin = require("./models/admin.js")(db.sequelize, DataTypes);
 db.shoppingCart = require("./models/shoppingCart.js")(db.sequelize, DataTypes);
 db.cartItem = require("./models/cartItem.js")(db.sequelize, DataTypes);
 db.review = require("./models/review.js")(db.sequelize, DataTypes);
+db.follow = require("./models/follow.js")(db.sequelize, DataTypes);
 db.product = require("./models/product.js")(db.sequelize, DataTypes);
 db.adminActions = require("./models/adminActions.js")(db.sequelize, DataTypes);
 db.moderateReview = require("./models/moderateReview.js")(db.sequelize, DataTypes);
@@ -28,6 +29,18 @@ db.moderateReview = require("./models/moderateReview.js")(db.sequelize, DataType
 // db.post.belongsTo(db.user, { foreignKey: { name: "username", allowNull: false } });
 db.user.hasOne(db.shoppingCart, { foreignKey: 'userID' });
 db.user.hasMany(db.review, { foreignKey: 'userID' });
+db.user.belongsToMany(db.user, {
+  through: db.follow,
+  as: 'Followers',
+  foreignKey: 'followingId',
+  otherKey: 'followerId'
+});
+db.user.belongsToMany(db.user, {
+  through: db.follow,
+  as: 'Following',
+  foreignKey: 'followerId',
+  otherKey: 'followingId'
+});
 
 db.admin.hasMany(db.adminActions, { foreignKey: 'adminID' });
 db.admin.hasMany(db.moderateReview, { foreignKey: 'adminID' });

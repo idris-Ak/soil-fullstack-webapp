@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {Card, Button, Row, Col, Alert, Modal, Form} from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
-  //Get current user from local storage 
-  const currentUserEmail = localStorage.getItem('currentUserEmail');
   const [userDetails, setUserDetails] = useState({name:'', email:'', dateJoined:''});
   //State for new user details upon editing their profile
-  const [editDetails, setEditDetails] = useState({name:'', email:'', newPassword:'', confirmNewPassword:''});
+  const [editDetails, setEditDetails] = useState({
+    name: '', 
+    email: '',
+    newPassword: '',
+    confirmNewPassword: ''
+  }); 
   //State for displaying the profile edit page
   const[showEditPage, setEditPage] = useState(false);
   const[showAlert, setAlert] = useState(false);
@@ -19,87 +23,86 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    //Fetch all users from localStorage and find the current user by email
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const currentUser = users.find(user => user.email === currentUserEmail);
-    if (currentUser) {
-      //If currentUser exists, set userDetails to currentUser details
-      setUserDetails(currentUser);
-      setEditDetails({ ...currentUser, newPassword: '', confirmNewPassword: '' });
+    if (!currentUser) {
+      navigate('/Login');
     } else {
-      navigate("/Login");
+      setUserDetails({
+        //Ensure that all values are handled properly
+        name: currentUser.name || '',
+        email: currentUser.email || '',
+        dateJoined: currentUser.dateJoined || 'N/A'
+      });
+      setEditDetails({
+        name: currentUser.name || '',
+        email: currentUser.email || '',
+        newPassword: '',
+        confirmNewPassword: ''
+      });
     }
-  }, [currentUserEmail, navigate]);
+  }, [currentUser, navigate]);
 
-  const handleSaveChanges = () => {
-    //Handle password changes when user is editing their profile
-    if (editDetails.newPassword && editDetails.newPassword !== editDetails.confirmNewPassword) {
-      setAlertContentDanger("New passwords do not match.");
-      setAlertDanger(true);
-      setTimeout(() => {
-        setAlertDanger(false);
-        }, 2500);
-      return;
-    }
+  const handleSaveChanges = async() => {
+      //Handle password changes when user is editing their profile
+      if (editDetails.newPassword && editDetails.newPassword !== editDetails.confirmNewPassword) {
+        setAlertContentDanger("New passwords do not match.");
+        setAlertDanger(true);
+        setTimeout(() => {
+          setAlertDanger(false);
+          }, 2500);
+        return;
+  }
 
-    if (editDetails.newPassword && !isPasswordStrong(editDetails.newPassword)) {
-      //Check if new password is strong or not
-      setAlertContentDanger("Password does not meet the strong criteria.");
-      setAlertDanger(true);
-      setTimeout(() => {
-        setAlertDanger(false);
-        }, 2500);
-      return;
-    }
-
-    //Verify if the new email is already registered or not 
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const emailTaken = users.some(user => user.email === editDetails.email && user.email !== currentUserEmail);
-
-    if (editDetails.email !== currentUserEmail && emailTaken) {
-      setAlertContentDanger("The email given is already registered.");
-      setAlertDanger(true);
-      setTimeout(() => {
-        setAlertDanger(false);
+  if (editDetails.newPassword && !isPasswordStrong(editDetails.newPassword)) {
+    //Check if new password is strong or not
+    setAlertContentDanger("Password does not meet the strong criteria.");
+    setAlertDanger(true);
+    setTimeout(() => {
+      setAlertDanger(false);
       }, 2500);
-      return;
-    }
+    return;
+  }
 
-
-  //Find the index of the current user in the users array and update the current user
-    const userIndex = users.findIndex(user => user.email === currentUserEmail);
-    if (userIndex !== -1) {
-      const updatedUser = {
-        ...currentUser,
-        name: editDetails.name,
-        email: editDetails.email,
-        password: editDetails.newPassword ? editDetails.newPassword : currentUser.password,
-        confirmPassword: editDetails.confirmNewPassword ? editDetails.confirmNewPassword : currentUser.confirmPassword,
-        dateJoined: currentUser.dateJoined
-      };
-      users[userIndex] = updatedUser;
-      localStorage.setItem('users', JSON.stringify(users));
-      //Update the currentUserEmail if email was changed
-      if (currentUserEmail !== editDetails.email) {
-        localStorage.setItem('currentUserEmail', updatedUser.email);
-      }
-      updateCurrentUser(updatedUser);
-      setUserDetails(updatedUser);
-      //Update local state to reflect changes
+  try{
+    //Update the user details if details are edited 
+    const updates = {
+      name: editDetails.name,
+      email: editDetails.email,
+      ...(editDetails.newPassword && { password: editDetails.newPassword })
+    };
+      const response = await axios.patch(`http://localhost:4000/api/user/${currentUser.id}`, updates);
+      if (response.status === 200) {
+      updateCurrentUser(response.data.user);
+      setUserDetails(response.data.user);
       setAlertContent('Profile Successfully Updated!');
       setAlert(true);
       setTimeout(() => {
         setAlert(false);
       }, 2000);
       setEditPage(false);
+      }
+    } catch(error){
+      //If details were not successfully updated, output the appropriate error message 
+      if (error.response && error.response.status === 409) {
+        setAlertContentDanger(error.response.data.message);
+        setAlertDanger(true); 
+        setTimeout(() => {
+          setAlertDanger(false);
+        }, 2000);
     }
+    else { 
+      setAlertContentDanger('Failed to update profile');
+      setAlertDanger(true); 
+      setTimeout(() => {
+        setAlertDanger(false);
+      }, 2000);
+    }
+  }
      };
 
-     const handleDeleteProfile = () => {
-      //Remove the current user logged in from local storage 
-      let users = JSON.parse(localStorage.getItem('users')) || [];
-      users = users.filter(user => user.email !== currentUserEmail);
-      localStorage.setItem('users', JSON.stringify(users));
+     const handleDeleteProfile = async() => {
+     try{
+      //Try to get connection with api 
+      await axios.delete(`http://localhost:4000/api/user/${currentUser.id}`);
       setAlertContent('Profile Successfully Deleted!');
       setShowDeleteConfirm(false);
       setAlert(true);
@@ -110,6 +113,9 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
         //Navigate back to login page after successful deletion
         navigate('/Login');
       }, 2500);
+     } catch(error){
+      console.error('Failed to delete profile', error);
+     }
     };
 
   //Handle the change of user details if edited

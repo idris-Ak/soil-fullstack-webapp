@@ -5,6 +5,8 @@ module.exports = (express, app) => {
   // Select add all router methods (get, post, etc)
   router.post('/SignUp', controller.SignUp);
   router.post('/Login', controller.Login);
+  router.patch('/:id', controller.updateUser);
+  router.delete('/:id', controller.deleteUser);
   // Add routes to server.
   app.use("/api/user", router);
 };

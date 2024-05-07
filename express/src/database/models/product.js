@@ -1,8 +1,9 @@
 module.exports = (sequelize, DataTypes) =>
-  sequelize.define("product", {
+  sequelize.define("Product", {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
+      allowNull: false,
       autoIncrement: true
     },
     name: {
@@ -11,15 +12,21 @@ module.exports = (sequelize, DataTypes) =>
     },
     description:{
       type: DataTypes.TEXT,
-      allowNull: false
     },
     type: {
-      type: DataTypes.ENUM('type1', 'type2', 'type3'),
+      type: DataTypes.ENUM('Dairy & Eggs', 'Fruits', 'Vegetables', 'Bakery', 'Meat & Seafood', 'Grains & Pasta', 'Nuts & Seeds'),
       allowNull: false
     },
     price: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false
+    },
+    isSpecial: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false 
+    },
+    img: {
+      type: DataTypes.STRING
     }
   }, {
     tableName: 'products'

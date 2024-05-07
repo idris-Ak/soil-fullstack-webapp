@@ -6,12 +6,10 @@ import { Button, Form, Alert, Container } from 'react-bootstrap';
 function Login({loginUser}) {
 //These states are based upon the states from the Week 2 Full Stack Development lectorial code for cosc2758 semester 1, 2024
 const[userDetails, setUserDetails] = useState({email:'', password:''}); 
-const [submitted, setSubmitted] = useState('');
-//Show success alert
-const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 //Add an error message state
 const [errorMessage, setErrorMessage] = useState('');
 const[showErrorMessage, setShowErrorMessage] = useState(false);
+const[showSuccessAlert, setShowSuccessAlert] = useState(false);
 const navigate = useNavigate();
 
 const handleChange = (event) => {
@@ -22,41 +20,39 @@ const handleChange = (event) => {
 }; 
 
 const handleSubmit = async (event) => {
-event.preventDefault(); 
- //Reset alerts on form submission
- setShowSuccessAlert(false);
- setShowErrorMessage(false);
-try {
-  //Show success alert
-  setShowSuccessAlert(true); 
-  setTimeout(() => {
-      //Hide success alert after 2.5 seconds
-      setShowSuccessAlert(false);
-      loginUser(userDetails);
-      //Navigate to profile page after successful login
-      navigate('/MyProfile');
-  }, 2500);
-}
-catch(error){
-    //Update error message
-    setErrorMessage('Email Address and/or password invalid, please try again.');
-    setShowErrorMessage(true);
-    setTimeout(() => setShowErrorMessage(false), 3000);
-    //The following has been borrowed from the Week 2 Full Stack Development lectorial code for cosc2758 semester 1, 2024
-    //Reset password field to blank.
-    const temp = { ...userDetails };
-    temp.password = "";
-    setUserDetails(temp);
-}
-setSubmitted(true); 
+  event.preventDefault();
+  setShowErrorMessage(false);
+  try {
+      //Attempt to login
+      const response = await loginUser(userDetails, navigate);
+      if (response.data.user) {
+          setShowSuccessAlert(true);
+          setTimeout(() => {
+            setShowSuccessAlert(false);
+            //Redirect to profile after alert has been shown for 2.5 seconds
+            navigate('/MyProfile');
+        }, 2500);
+      } 
+      else {
+          throw new Error('Login unsuccessful');
+      }
+  } catch (error) {
+      //Handle any errors that occur during login
+      setErrorMessage(error.response?.data.message || 'Invalid email or password');
+      setShowErrorMessage(true);
+      //Hide error alerts after 2.5 seconds
+      setTimeout(() => setShowErrorMessage(false), 2500);
+      //Reset the password field only after an unsuccessful login attempt
+      setUserDetails(prevDetails => ({ ...prevDetails, password: '' }));
+  }
 };
 
 return(
   <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '75vh', fontFamily: 'Lato, sans-serif'}}>
   <div className="w-100 p5" style={{ maxWidth: '600px', background: '#ffffff', borderRadius: '20px', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1'}}>
   {showErrorMessage && errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
-  {submitted && showSuccessAlert && <Alert variant="success">Login Successful!</Alert>}
-    <Form onSubmit={handleSubmit} className="p-5">
+  {showSuccessAlert && <Alert variant="success">Login Successful!</Alert>}
+      <Form onSubmit={handleSubmit} className="p-5">
     <h2 className="mb-4 text-center" style={{ fontWeight: '700', color: '#333', fontFamily: 'Lato, sans-serif', fontSize: '40px'}}>Login</h2>
         <Form.Group controlId='userEmailLogin' className="mb-4" style={{fontSize: '20px'}}>
           <Form.Control type="email" name="email" value={userDetails.email} placeholder="Email Address" onChange={handleChange} required className="py-2"/>

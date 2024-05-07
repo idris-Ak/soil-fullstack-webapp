@@ -2,6 +2,7 @@ module.exports = (sequelize, DataTypes) => {
   const AdminActions = sequelize.define('AdminActions', {
     id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       primaryKey: true,
       autoIncrement: true
     },

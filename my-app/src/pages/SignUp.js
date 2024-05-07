@@ -54,8 +54,13 @@ function SignUp({loginUser}) {
   if(!validateForm()){
     return;
   }
+//Try to get connection with the api 
 try{
-  await axios.post('http://localhost:4000/api/user/SignUp', user);
+  await axios.post('http://localhost:4000/api/user/SignUp', {
+    name: user.name,
+    email: user.email,
+    password: user.password
+});
   //Register user if validations pass
    setShowSuccessAlert(true);
       setTimeout(() => {

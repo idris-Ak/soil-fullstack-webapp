@@ -12,6 +12,7 @@ app.use(express.json());
 
 // Add CORS suport.
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 
 // Simple Hello World route.
 app.get("/", (req, res) => {

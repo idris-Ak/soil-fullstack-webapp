@@ -25,7 +25,6 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cart, setCart] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
-
   //Function to add item to cart
   const addToCart = (newItem, amount) => {
     //if item exsist in cart conditional statement add to quantity to that item
@@ -101,13 +100,28 @@ function App() {
 
   const loginUser = async (userDetails) => {
     try {
-      const response = await axios.post('http://localhost:4000/api/user/Login', userDetails);
-      setCurrentUser(response.data.user);
-      setIsLoggedIn(true);
+      //Try to get connection with api
+        const response = await axios.post('http://localhost:4000/api/user/Login', userDetails);
+        //If the user successfully logs in then update the states
+        if (response.status === 200 && response.data.user) {
+            setCurrentUser(response.data.user);
+            setIsLoggedIn(true);
+            return response;
+        } else {
+            //If the status code is not 200, output an error
+            throw new Error(response.data.message || "Invalid credentials");
+        }
     } catch (error) {
-      console.error('Login error:', error);
+        console.error('Login error:', error.response?.data.message || "No error message from server");
+        throw error; // Rethrow the error to handle it in the calling function
     }
-  };
+};
+
+  useEffect(() => {
+    if (!isMounted) {
+    setIsMounted(true);
+    }
+  }, [isMounted]);
 
   const logoutUser = () => {
     setCurrentUser(null);
