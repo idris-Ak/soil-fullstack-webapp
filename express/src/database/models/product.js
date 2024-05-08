@@ -1,6 +1,6 @@
-module.exports = (sequelize, DataTypes) =>
-  sequelize.define("Product", {
-    id: {
+module.exports = (sequelize, DataTypes) => {
+const Product = sequelize.define('Product', {
+  productID: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       allowNull: false,
@@ -29,5 +29,7 @@ module.exports = (sequelize, DataTypes) =>
       type: DataTypes.STRING
     }
   }, {
-    tableName: 'products'
+    tableName: 'Products'
   });
+  return Product;
+}

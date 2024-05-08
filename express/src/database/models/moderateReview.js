@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const ModerateReview = sequelize.define('ModerateReview', {
-      id: {
+      modID: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
@@ -10,16 +10,16 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: 'admins',
-          key: 'id'
+          models: 'Admin',
+          key: 'adminID'
         }
       },
       reviewID: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'reviews',
-        key: 'id'
+        models: 'Review',
+        key: 'reviewID'
       }
     },
       ModerationActionTaken: {
@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       }
     }, {
-      tableName: 'moderatereviews'
+      tableName: 'moderateReviews'
     });
     return ModerateReview;
   };

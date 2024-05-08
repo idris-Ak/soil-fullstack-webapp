@@ -32,14 +32,14 @@ db.user.hasMany(db.review, { foreignKey: 'userID' });
 db.user.belongsToMany(db.user, {
   through: db.follow,
   as: 'Followers',
-  foreignKey: 'followingId',
-  otherKey: 'followerId'
+  foreignKey: 'followingID',
+  otherKey: 'followerID'
 });
 db.user.belongsToMany(db.user, {
   through: db.follow,
   as: 'Following',
-  foreignKey: 'followerId',
-  otherKey: 'followingId'
+  foreignKey: 'followerID',
+  otherKey: 'followingID'
 });
 
 db.admin.hasMany(db.adminActions, { foreignKey: 'adminID' });
@@ -69,9 +69,10 @@ db.adminActions.belongsTo(db.admin, { foreignKey: 'adminID' });
 db.sync = async () => {
   // Sync schema.
   await db.sequelize.sync();
-
-  // Can sync with force if the schema has become out of date - note that syncing with force is a destructive operation.
+  // await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+  // // Can sync with force if the schema has become out of date - note that syncing with force is a destructive operation.
   // await db.sequelize.sync({ force: true });
+  // await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
   
   // await seedData();
 };

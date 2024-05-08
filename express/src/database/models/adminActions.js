@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const AdminActions = sequelize.define('AdminActions', {
-    id: {
+    actionID: {
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'admins',
-        key: 'id'
+        models: 'Admin',
+        key: 'adminID'
       }
     },
     description: {
@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     }
   }, {
-    tableName: 'adminactions'
+    tableName: 'adminActions'
   });
   return AdminActions;
 };

@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     }
   }, {
-    tableName: 'users'
+    tableName: 'Users'
     });
     // Don't add the timestamp attributes (updatedAt, createdAt).
     // timestamps: false

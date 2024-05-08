@@ -1,25 +1,25 @@
 module.exports = (sequelize, DataTypes) => {
 const Follow = sequelize.define('Follow', {
-    followerId: {
+    followerID: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         allowNull: false,
         references: {
-            model: 'users',
+            model: 'User',
             key: 'id'
         }
     },
-    followingId: {
+    followingID: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         allowNull: false,
         references: {
-            model: 'users',
+            model: 'User',
             key: 'id'
         }
     }
 }, {
-    tableName: 'follows',
+    tableName: 'userFollows',
     timestamps: false
 });
 

@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const ShoppingCart = sequelize.define("ShoppingCart", {
-    id: {
+    cartID: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       allowNull: false,
@@ -11,12 +11,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        models: 'users',
+        models: 'User',
         key: 'id'
       }
     }
   }, {
-    tableName: 'shoppingcarts'
+    tableName: 'shoppingCarts'
   });
 
   return ShoppingCart;

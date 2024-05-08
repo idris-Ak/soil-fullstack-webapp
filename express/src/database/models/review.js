@@ -1,6 +1,6 @@
-module.exports = (sequelize, DataTypes) =>
-  sequelize.define("review", {
-    id: {
+module.exports = (sequelize, DataTypes) => {
+const Review = sequelize.define('Review', {
+  reviewID: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       allowNull: false,
@@ -10,15 +10,15 @@ module.exports = (sequelize, DataTypes) =>
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'products',
-        key: 'id'
+        models: 'Product',
+        key: 'productID'
       }
     },
     userID: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'users',
+        models: 'User',
         key: 'id'
       }
     },
@@ -32,5 +32,7 @@ module.exports = (sequelize, DataTypes) =>
       allowNull: false
     }
   }, {
-    tableName: 'reviews'
+    tableName: 'Reviews'
   });
+  return Review; 
+}
