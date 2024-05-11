@@ -27,10 +27,10 @@ export const Product = ({ item, addToCart, isLoggedIn }) => {
     return (
         <Card className="product-card" style={{ width: '18rem', height:'30rem' }}>
             <Card.Img onClick={handleShow} style={{ cursor: 'pointer'}} variant="top" src={item.img} alt={item.name} className="product-image" />
-            {item.special && <div className="photos"  onClick={handleShow} style={{ cursor: 'pointer'}}>Special</div>}
+            {item.isSpecial && <div className="photos"  onClick={handleShow} style={{ cursor: 'pointer'}}>Special</div>}
             <Card.Body className="product-body">
                 <Card.Title className="product-title"  onClick={handleShow} style={{ cursor: 'pointer'}}>{item.name}</Card.Title>
-                <Card.Text className="product-price">${item.price.toFixed(2)}</Card.Text>
+                <Card.Text className="product-price">${item.price}</Card.Text>
                 <Button onClick={handleAddToCart} className="add-to-cart-btn">
                     Add To Cart
                 </Button>

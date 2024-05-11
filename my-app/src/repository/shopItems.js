@@ -1,5 +1,8 @@
+import axios from "axios";
+
 const ITEMS = "items";
 const CART = "cart"
+
 
 // Initialise local storage "users" with data, if the data is already set this function returns immediately.
 function initItems() {
@@ -46,9 +49,14 @@ function initItems() {
   localStorage.setItem(ITEMS, JSON.stringify(hardcodedShopItems));
 }
 
-function getShopItems() {
-  const data = localStorage.getItem(ITEMS);
-  return JSON.parse(data);
+// retrieve all products from database 
+const getShopItems = async () => {
+  try {
+      const result = await axios.get("http://localhost:4000/api/product");
+      return result.data;
+  } catch (error) {
+      console.log("Error fetching data:", error);
+  }
 }
 
 function initCart() {
@@ -70,10 +78,11 @@ function getCartItems() {
   // Function to retrieve special shop items
   export const getSpecialItems = () => {
     // Filter the shop items array to return only items marked as special
-    const allItems = getShopItems();
+    const allItems = [];
 
-    return allItems.filter(item => item.special);
+    return allItems.filter(item => item.isSpecial);
   };
+  
   
   export {
     initItems,

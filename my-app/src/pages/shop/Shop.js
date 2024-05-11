@@ -9,11 +9,14 @@ function Shop({ addToCart, isLoggedIn}) {
     const [shopItems, setShopItems] = useState([]);
 
     // Load shop items and special items when the component mounts
+    // Load shop items when the component mounts
     useEffect(() => {
-        const items = getShopItems();
-        setShopItems(items);
-    }, []); // Empty dependency array ensures this effect runs only once on component mount
-
+        const fetchData = async () => {
+            const items = await getShopItems();
+            setShopItems(items);
+        };
+        fetchData();
+    }, []);
     return (
         <div>
             <div className="custom-wrapper">
@@ -52,7 +55,7 @@ function Shop({ addToCart, isLoggedIn}) {
                 <div className="container">
                     <div className="row">
                         {shopItems.map((item) => (
-                            <div key={item.id} className="col-md-6 col-lg-4 col-xl-3">
+                            <div key={item.productID} className="col-md-6 col-lg-4 col-xl-3">
                                 <Product item={item} addToCart={addToCart} isLoggedIn={isLoggedIn}/>
                             </div>
                         ))}
