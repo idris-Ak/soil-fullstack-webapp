@@ -50,37 +50,30 @@ exports.Login = async(req, res) => {
 
 exports.updateUser = async (req, res) => {
     const { id } = req.params;
-    const { name, email, password} = req.body;
+    const { name, password: { oldPassword, newPassword } } = req.body;
     try {
-        //Check if the new email inputted through editing user details is the same as the the ones in the database 
-        if (email) {
-            const existingUser = await db.user.findOne({
-                where: {
-                    email: email,
-                    id: { [Op.ne]: id }
-                }
-            });
-            //If the new email is the same as an email stored in the database, send an error to the user
-            if (existingUser) {
-                return res.status(409).send({ message: "Email already registered to another user." });
+        const user = await db.user.findByPk(id);
+        if (!user) {
+            return res.status(404).send({ message: "User not found." });
+        }
+            // Verify old password
+            if (oldPassword && !(await bcrypt.compare(oldPassword, user.password))) {
+                return res.status(401).send({ message: "Invalid old password." });
             }
+
+        //If a new password is provided, hash it and update
+        if (newPassword) {
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            user.password = hashedPassword;
         }
 
-        const updates = { name, email };
-       //Check if a new password has been provided and hash it
-       if (password && password.trim()) {
-        updates.password = await bcrypt.hash(password, 10);
+        //Update name if provided
+        if (name) {
+            user.name = name;
         }
 
-        //Update user details in the database
-         const result = await db.user.update(updates, {
-            where: { id }
-        });
+        await user.save();
 
-        //Check if the update operation was successful or not
-        if (result == 0) {
-            return res.status(404).send({ message: "User not found or no new data provided." });
-        }
 
         //Find current user details in the database
         const updatedUser = await db.user.findOne({
@@ -89,8 +82,13 @@ exports.updateUser = async (req, res) => {
         });
         
         //Make sure the dateJoined is still in yyyy/mm/dd format 
-        updatedUser.dataValues.dateJoined = updatedUser.dateJoined.toISOString().split('T')[0];
-        res.json({ message: "User updated successfully.", user: updatedUser });
+        if (updatedUser) {
+            //Make sure the dateJoined is still in yyyy/mm/dd format 
+            updatedUser.dataValues.dateJoined = updatedUser.dateJoined.toISOString().split('T')[0];
+            res.json({ message: "User updated successfully.", user: updatedUser });
+        } else {
+            return res.status(404).send({ message: "User not found or no new data provided." });
+        }
         
     } catch (error) {
         console.error("Error updating user:", error);

@@ -8,7 +8,7 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
   //State for new user details upon editing their profile
   const [editDetails, setEditDetails] = useState({
     name: '', 
-    email: '',
+    oldPassword: '',
     newPassword: '',
     confirmNewPassword: ''
   }); 
@@ -26,15 +26,11 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
     if (!currentUser) {
       navigate('/Login');
     } else {
-      setUserDetails({
-        //Ensure that all values are handled properly
-        name: currentUser.name || '',
-        email: currentUser.email || '',
-        dateJoined: currentUser.dateJoined || 'N/A'
-      });
+      const { name, email, dateJoined } = currentUser;
+      setUserDetails({ name, email, dateJoined: dateJoined || 'N/A' });
       setEditDetails({
-        name: currentUser.name || '',
-        email: currentUser.email || '',
+        name: name || '',
+        oldPassword: '',
         newPassword: '',
         confirmNewPassword: ''
       });
@@ -66,8 +62,10 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
     //Update the user details if details are edited 
     const updates = {
       name: editDetails.name,
-      email: editDetails.email,
-      ...(editDetails.newPassword && { password: editDetails.newPassword })
+      password: {
+      oldPassword: editDetails.oldPassword,
+      newPassword: editDetails.newPassword
+    }
     };
       const response = await axios.patch(`http://localhost:4000/api/user/${currentUser.id}`, updates);
       if (response.status === 200) {
@@ -82,20 +80,11 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
       }
     } catch(error){
       //If details were not successfully updated, output the appropriate error message 
-      if (error.response && error.response.status === 409) {
         setAlertContentDanger(error.response.data.message);
         setAlertDanger(true); 
         setTimeout(() => {
           setAlertDanger(false);
         }, 2000);
-    }
-    else { 
-      setAlertContentDanger('Failed to update profile');
-      setAlertDanger(true); 
-      setTimeout(() => {
-        setAlertDanger(false);
-      }, 2000);
-    }
   }
      };
 
@@ -172,8 +161,8 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
               <Form.Control type="text" name="name" value={editDetails.name} onChange={handleChange} />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control type="email" name="email" value={editDetails.email} onChange={handleChange} />
+              <Form.Label>Old Password</Form.Label>
+              <Form.Control type="password" name="oldPassword" value={editDetails.oldPassword} onChange={handleChange} placeholder="Old Password" />
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Label>New Password</Form.Label>

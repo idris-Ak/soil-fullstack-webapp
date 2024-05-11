@@ -21,8 +21,8 @@ import axios from 'axios';
 
 
 function App() {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('currentUser')) || null);
+  const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
   const [cart, setCart] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
   //Function to add item to cart
@@ -104,6 +104,8 @@ function App() {
         const response = await axios.post('http://localhost:4000/api/user/Login', userDetails);
         //If the user successfully logs in then update the states
         if (response.status === 200 && response.data.user) {
+          localStorage.setItem('currentUser', JSON.stringify(response.data.user));
+          localStorage.setItem('isLoggedIn', 'true');
             setCurrentUser(response.data.user);
             setIsLoggedIn(true);
             return response;
@@ -124,6 +126,8 @@ function App() {
   }, [isMounted]);
 
   const logoutUser = () => {
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('isLoggedIn');
     setCurrentUser(null);
     setIsLoggedIn(false);
     //Reset the meal plan to a blank state
@@ -132,6 +136,7 @@ function App() {
 
   //Update user details upon editing them in the profile page
   const updateCurrentUser = (user) => {
+    localStorage.setItem('currentUser', JSON.stringify(user));
     setCurrentUser(user);
   };
   
