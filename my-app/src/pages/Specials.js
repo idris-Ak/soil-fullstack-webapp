@@ -12,10 +12,16 @@ function Specials({ addToCart, isLoggedIn}) {
 
 
   useEffect(() => {
-    // Load shop items and special items when the component mounts
-    const specialItems = getSpecialItems();
-    setSpecialItems(specialItems);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const specials = await getSpecialItems();
+        setSpecialItems(specials);
+      } catch (error) {
+        console.log("Error fetching special items:", error);
+      }
+    };
+  
+    fetchData();  }, []);
 
   return (
     <div className="container-fluid">

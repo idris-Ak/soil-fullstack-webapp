@@ -23,13 +23,31 @@ exports.addProduct = async (req, res) => {
   };
   
   // Function to fetch all products
-exports.getAllProducts = async (req, res) => {
+  exports.getAllProducts = async (req, res) => {
     try {
         // Fetch all products from the database
         const products = await db.product.findAll();
 
         // Send the products as JSON response
         res.json(products);
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        // Handle error appropriately, e.g., send an error response
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+// Function to fetch Special products
+exports.getSpecialProducts = async (req, res) => {
+    try {
+        // Fetch all products from the database
+        const Specialproducts = await db.product.findAll({
+            where: {
+                isSpecial: true,
+            },
+        });
+
+        // Send the products as JSON response
+        res.json(Specialproducts);
     } catch (error) {
         console.error("Error fetching products:", error);
         // Handle error appropriately, e.g., send an error response

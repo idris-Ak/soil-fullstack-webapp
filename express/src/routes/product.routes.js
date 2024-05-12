@@ -4,9 +4,10 @@ module.exports = (express, app) => {
   
     router.post('/', controller.addProduct);
 
-    // get specials
     // GET request to fetch all products
-    router.get('/', controller.getAllProducts);  
+    router.get('/', controller.getAllProducts); 
+
+    router.get('/specials', controller.getSpecialProducts);  
 
       // Add routes to server.
       app.use("/api/product", router);

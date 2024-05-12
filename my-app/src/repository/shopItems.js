@@ -76,12 +76,14 @@ function getCartItems() {
 }
 
   // Function to retrieve special shop items
-  export const getSpecialItems = () => {
-    // Filter the shop items array to return only items marked as special
-    const allItems = [];
-
-    return allItems.filter(item => item.isSpecial);
-  };
+  export const getSpecialItems = async () => {
+    try {
+      const result = await axios.get("http://localhost:4000/api/product/specials");
+      return result.data;
+  } catch (error) {
+      console.log("Error fetching data:", error);
+  }
+}
   
   
   export {
