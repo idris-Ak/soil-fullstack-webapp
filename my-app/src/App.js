@@ -155,7 +155,7 @@ function App() {
               <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
               <Route path="/myprofile" element={<MyProfile currentUser={currentUser} updateCurrentUser={updateCurrentUser} logoutUser={logoutUser} />} />
               <Route path="/specials" element={<Specials addToCart={addToCart} isLoggedIn={isLoggedIn}/>} />
-              <Route path="/shop" element={<Shop addToCart={addToCart} isLoggedIn={isLoggedIn}/>} />
+              <Route path="/shop" element={<Shop addToCart={addToCart} isLoggedIn={isLoggedIn} currentUser={currentUser} />} />
               <Route path="/cart" element={<Cart cart={cart} addToCart={addToCart} removeFromCart={removeFromCart}/>} />
               <Route path="/shipping" element={<Shipping />}/>
               <Route path="/Payment" element={<Payment />}/>

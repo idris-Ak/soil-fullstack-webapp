@@ -28,7 +28,7 @@ db.moderateReview = require("./models/moderateReview.js")(db.sequelize, DataType
 // example of post and user below.
 // db.post.belongsTo(db.user, { foreignKey: { name: "username", allowNull: false } });
 db.user.hasOne(db.shoppingCart, { foreignKey: 'userID' });
-db.user.hasMany(db.review, { foreignKey: 'userID' });
+db.user.hasMany(db.review, { foreignKey: 'userID', as: 'reviews' });
 db.user.belongsToMany(db.user, {
   through: db.follow,
   as: 'Followers',
@@ -54,7 +54,7 @@ db.cartItem.belongsTo(db.product, { foreignKey: 'productID' });
 db.product.hasMany(db.cartItem, { foreignKey: 'productID' });
 db.product.hasMany(db.review, { foreignKey: 'productID' });
 
-db.review.belongsTo(db.user, { foreignKey: 'userID' });
+db.review.belongsTo(db.user, { foreignKey: 'userID', as: 'user' });
 db.review.belongsTo(db.product, { foreignKey: 'productID' });
 db.review.hasMany(db.moderateReview, { foreignKey: 'reviewID' });
 

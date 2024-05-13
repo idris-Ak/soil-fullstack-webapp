@@ -3,7 +3,7 @@ import { getShopItems } from '../../repository/shopItems'; // Import shop items 
 import { Product } from './Product';
 import "./shop.css";
 
-function Shop({ addToCart, isLoggedIn}) {
+function Shop({ addToCart, isLoggedIn, currentUser}) {
 
     // State variables to hold shop items and special shop items
     const [shopItems, setShopItems] = useState([]);
@@ -56,7 +56,7 @@ function Shop({ addToCart, isLoggedIn}) {
                     <div className="row">
                         {shopItems.map((item) => (
                             <div key={item.productID} className="col-md-6 col-lg-4 col-xl-3">
-                                <Product item={item} addToCart={addToCart} isLoggedIn={isLoggedIn}/>
+                                <Product item={item} addToCart={addToCart} isLoggedIn={isLoggedIn} currentUser={currentUser} />
                             </div>
                         ))}
                     </div>

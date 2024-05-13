@@ -5,7 +5,7 @@ const Follow = sequelize.define('Follow', {
         primaryKey: true,
         allowNull: false,
         references: {
-            model: 'User',
+            model: 'Users',
             key: 'id'
         }
     },
@@ -14,7 +14,7 @@ const Follow = sequelize.define('Follow', {
         primaryKey: true,
         allowNull: false,
         references: {
-            model: 'User',
+            model: 'Users',
             key: 'id'
         }
     }
