@@ -2,14 +2,21 @@ const db = require('../database');
 
 exports.postReview = async(req, res) => {
     try{
-        const{productID, userID, reviewText, numberOfStars} = req.body;
+        const{productID, userID, reviewText, numberOfStars, dateCreated} = req.body;
         //Validation check to ensure all attributes are not null
         if (!productID || !userID || !reviewText || !numberOfStars) {
             return res.status(400).send({ message: "Missing required fields" });
         }
         //Create a new review
-        const review = await db.review.create({productID, userID, reviewText, numberOfStars});
+        const review = await db.review.create({
+            productID,
+            userID: userID,
+            reviewText,
+            numberOfStars,
+            dateCreated
+        });        
         res.send(review);
+        
     } catch(error){
         //Return any possible errors
         console.error("Error posting review:", error);
@@ -106,10 +113,36 @@ exports.getReviews = async (req, res) => {
     try {
         const productID = req.params.productID;
         const currentUserID = req.query.currentUserID; 
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 3; //Default limit to 3 reviews per page
+        const sort = req.query.sort || 'Latest'; //Get sort parameter, default is 'Latest'
+        const offset = (page - 1) * limit;
+
+        //Define sorting order based on the sorting parameter
+        let order;
+           switch (sort) {
+               case 'Highest':
+                   order = [['numberOfStars', 'DESC']];
+                   break;
+               case 'Lowest':
+                   order = [['numberOfStars', 'ASC']];
+                   break;
+               case 'Latest':
+               default:
+                   order = [['dateCreated', 'DESC']];
+                   break;
+           }
+    
+        //Get the total count of reviews for pagination headers
+        const totalReviews = await db.review.count({
+            where: { productID }
+        });
 
         //Get all the existing reviews
         const reviews = await db.review.findAll({
             where: { productID },
+            limit: limit,
+            offset: offset,
             include: [
                 {   
                     //get the users from the database and include the followers
@@ -123,7 +156,8 @@ exports.getReviews = async (req, res) => {
                          //This makes sure to fetch all reviews, not just the ones the user follows
                         required: false 
                     }]
-                }]
+                }],
+                order: order
         });
         
         //Map the reviews and follows
@@ -132,7 +166,12 @@ exports.getReviews = async (req, res) => {
             isFollowing: review.user.Followers.length > 0
         }));
 
-        res.json(reviewsWithFollows);
+        res.json({
+            reviews: reviewsWithFollows,
+            page: page,
+            totalPages: Math.ceil(totalReviews / limit),
+            totalReviews: totalReviews
+        });
 
     } catch (error) {
       console.error("Error getting reviews:", error);
