@@ -10,13 +10,28 @@ exports.postReview = async(req, res) => {
         //Create a new review
         const review = await db.review.create({
             productID,
-            userID: userID,
+            userID,
             reviewText,
             numberOfStars,
             dateCreated
+        });
+          //Fetch user details to include in the response
+          const user = await db.user.findByPk(userID);
+          if (!user) {
+              return res.status(404).send({ message: "User not found." });
+          }        
+        res.send({
+            reviewID: review.reviewID,
+            productID: review.productID,
+            reviewText: review.reviewText,
+            numberOfStars: review.numberOfStars,
+            dateCreated: review.dateCreated,
+            user: {
+                id: user.id,
+                name: user.name 
+            },
+            isFollowing: false 
         });        
-        res.send(review);
-        
     } catch(error){
         //Return any possible errors
         console.error("Error posting review:", error);
@@ -27,11 +42,6 @@ exports.postReview = async(req, res) => {
 exports.editReview = async(req, res) => {
     const { reviewID } = req.params;
     const { reviewText, numberOfStars } = req.body;
-
-    //Validation check to handle null input fields
-    if (!reviewText || reviewText.trim() === '' || numberOfStars == null) {
-        return res.status(400).send({ message: "Review text and number of stars must be provided." });
-    }
 
     try{
         //Find the review by the reviewID
@@ -44,8 +54,21 @@ exports.editReview = async(req, res) => {
         review.reviewText = reviewText;
         review.numberOfStars = numberOfStars;
         await review.save();
-        res.send(review);
-    } catch(error){
+        //Fetch user details to include in the response
+        const user = await db.user.findByPk(review.userID);
+        if (!user) {
+              return res.status(404).send({ message: "User not found." });
+        }
+        res.send({
+            reviewID: review.reviewID,
+            reviewText: review.reviewText,
+            numberOfStars: review.numberOfStars,
+            user: {
+                id: user.id,
+                name: user.name  // Ensure name is sent back
+            }
+        });
+        } catch(error){
         //Return any possible errors
         console.error("Error editing review:", error);
         res.status(500).send({ message: "Internal Server Error", error: error.toString() });
@@ -112,7 +135,7 @@ exports.followUsers = async(req, res) => {
 exports.getReviews = async (req, res) => {
     try {
         const productID = req.params.productID;
-        const currentUserID = req.query.currentUserID; 
+        const currentUserID = req.query.currentUserID || null; 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 3; //Default limit to 3 reviews per page
         const sort = req.query.sort || 'Latest'; //Get sort parameter, default is 'Latest'

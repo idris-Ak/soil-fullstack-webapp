@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                models: 'ShoppingCart',
+                model: 'shoppingCarts',
                 key: 'cartID'
             }
         },
@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             references: {
-                models: 'Product',
+                model: 'Products',
                 key: 'productID'
             }
         },

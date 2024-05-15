@@ -12,7 +12,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     const [reviews, setReviews] = useState([]);
     const [averageRating, setAverageRating] = useState(0);
     const[newReview, setNewReview] = useState('');
-    const[rating, setRating] = useState(1); 
+    const[rating, setRating] = useState(0); 
     const[edit, setEdit] = useState(false); //State for editing reviews
     const[editReviewID, setEditReviewID] = useState(null); //State for the reviewID that is being edited
     const [errorMessage, setErrorMessage] = useState('');
@@ -32,7 +32,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         try {
             //Get the reviews from the database while fetching the currentUserID for the followers functionality 
             const response = await axios.get(`http://localhost:4000/api/review/${item.productID}`, {
-                params: { currentUserID: currentUser.id, page: currentPage, limit: reviewsPerPage, sort: sort }
+                params: {  currentUserID: currentUser ? currentUser.id : null, page: currentPage, limit: reviewsPerPage, sort: sort }
             });
             //Set the reviews
                 if (response.data) {
@@ -53,13 +53,10 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             }
         } catch (error) {
             //Send error messages if something doesn't work
-            setShowErrorMessage(true);
-            setTimeout(() => {
-            setErrorMessage(`Failed to load reviews: ${error.response?.data?.message || 'Server error'}`);
-            setShowErrorMessage(false);
-            }, 2500);
+            console.error(error)
         }
     }, [item.productID, currentUser, currentPage, sortOrder]);
+
 
     useEffect(() => {
         loadReviews();
@@ -81,11 +78,10 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             reviewText: newReview,
             numberOfStars: rating,
             dateCreated: currentDate, // Include the current date when submitting the review
-            userName: currentUser.name // Optional, based on your backend design
         };
 
         //Check if the review is between 1-100 words
-        if(newReview.length > 0 && newReview.length <= 100) {
+        if (newReview.length > 0 && newReview.length <= 100 && rating > 0) {
             //Fetch reviews based upon if the user is editing the review or not
             const fetchReviews = edit ? `http://localhost:4000/api/review/${editReviewID}` : 'http://localhost:4000/api/review';
             let response;
@@ -99,12 +95,17 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             try{
                 console.log("Review submitted:", response.data);
                 //Set reviews based on if the attributes of the review and the following state were updated
-                let updatedReviews = [...reviews];
+                let updatedReviews = [...reviews, {
+                    ...response.data,
+                    isFollowing: response.data.user.id === currentUser.id ? false : true // Set to false if the review is by the current user
+                }];
                 if (edit) {
-                    updatedReviews = updatedReviews.map(r => r.reviewID === response.data.reviewID ? { ...r, ...response.data } : r);
+                    updatedReviews = reviews.map(r => r.reviewID === response.data.reviewID ? { ...r, ...response.data } : r);
                 } else {
-                    updatedReviews = [...updatedReviews, { ...response.data, isFollowing: false }];
+                    updatedReviews = [...reviews, { ...response.data, isFollowing: false }];
                 }
+
+                setReviews(updatedReviews); 
     
                 //Determine if new page is needed
                 const newTotalPages = Math.ceil(updatedReviews.length / reviewsPerPage);
@@ -113,7 +114,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                     setCurrentPage(newTotalPages); 
                 }
                 setNewReview('');
-                setRating(1);
+                setRating(0);
                 setEdit(false);
                 setEditReviewID(null);
             } catch(error){
@@ -151,7 +152,24 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             const response = await axios.delete(`http://localhost:4000/api/review/${reviewID}`);
             //If the response status is successful then filter out the deleted reviews from the current reviews
             if (response.status === 200) {
-                setReviews(reviews.filter(review => review.reviewID !== reviewID));
+                const filteredReviews = reviews.filter(review => review.reviewID !== reviewID);
+                setReviews(filteredReviews);
+    
+                // Recalculate total pages after deletion
+                const updatedTotalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
+                setTotalPages(updatedTotalPages);
+    
+                // Adjust current page if necessary
+                if (currentPage > updatedTotalPages) {
+                    setCurrentPage(updatedTotalPages); // Adjust the current page or stay on the first page
+                } else if (currentPage > 1 && filteredReviews.length % reviewsPerPage === 0) {
+                    setCurrentPage(currentPage - 1); // Go to the previous page if the current one is empty
+                }
+                  //Reset the form state if the user was editing a review
+                  setNewReview('');
+                  setRating(0);
+                  setEdit(false);
+                  setEditReviewID(null);
             }
         } catch (error) {
             //Send error messages
@@ -169,10 +187,21 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         const method = review.isFollowing ? 'delete' : 'post';
         const endpoint = `http://localhost:4000/api/review/follow/${review.userID}`;
         try {
-            await axios[method](endpoint, { followerID: currentUser.id });
+            await axios({
+                method: method,
+                url: endpoint,
+                data: {
+                    followerID: currentUser.id // Ensuring followerID is being sent
+                }
+            });
             console.log("Follow toggled for user:", review.userID);
             //If the user follows another user, change the following status to true otherwise if they decide to unfollow someone, change the following status to false
-            setReviews(prev => prev.map(r => r.reviewID === review.reviewID ? { ...r, isFollowing: !r.isFollowing } : r));
+            setReviews(prevReviews => prevReviews.map(r => {
+                if (r.user.id === review.userID) {
+                    return {...r, isFollowing: !r.isFollowing};
+                }
+                return r;
+            }));
         } catch (error) {
             console.error('Error toggling follow status', error);
         }
@@ -209,6 +238,8 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     const renderPagination = () => {
+        if (totalPages <= 1) return null;
+
         let items = [];
         //Set the current page based on the number of pages 
         if (totalPages > 1) {
@@ -284,18 +315,23 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                 <hr />
                     <h3 style={{fontFamily: 'Open Sans, sans-serif', fontWeight: 'bold'}} >Reviews</h3>
                     {renderSortOptions()}
-                    {reviews.length > 0 ? reviews.map(review => (
-                        <div key={review.reviewID} className="review-item" style={{ fontFamily: 'Roboto, sans-serif', borderBottom: '1px solid #e0e0e0'}}>
+                    {reviews.length > 0 ? reviews.map((review, index) => (
+                        <div key={`${review.reviewID}-${index}`}  className="review-item" style={{ fontFamily: 'Roboto, sans-serif', borderBottom: '1px solid #e0e0e0'}}>
                             <div style={{marginTop: '10px'}} className="rating">
                                 {/* OpenAI (2024) ChatGPT [Large language model], accessed 13 May 2024. (*Link could not be generated successfully*) */}
                                 {[...Array(review.numberOfStars)].map((_, i) => (
-                                    <i key={i} className="fas fa-star checked" style={{ color: 'gold' }}></i>
-                                ))}
+                                 <i key={`star-${review.reviewID || index}-${i}`}  className="fas fa-star checked" style={{ color: 'gold' }}></i>
+                                    ))}
                                 {[...Array(5 - review.numberOfStars)].map((_, i) => (
-                                    <i key={i} className="far fa-star" style={{ color: 'gold' }}></i>
-                                ))}
+                                <i key={`empty-star-${review.reviewID || index}-${i}`} className="far fa-star" style={{ color: 'gold' }}></i>
+                             ))}
                             </div>
-                                <strong>{review.user ? review.user.name : 'Anonymous'}</strong>
+                                <strong>{review.user.name}</strong>
+                                {currentUser && currentUser.id !== review.userID && (
+                                <Button style={{fontFamily: 'Open Sans, sans-serif', marginLeft: '10px'}} variant="info"  size="sm"  className="ml-auto" onClick={() => toggleFollow(review)}>
+                                    {review.isFollowing ? 'Unfollow' : 'Follow'}
+                                </Button>
+                            )}
                                 <span style={{ float: 'right', fontSize: '0.8em', color: 'gray' }}>{new Date(review.dateCreated).toLocaleDateString()}</span>
                                 <br />
                                 <div style={{marginTop: '8px', marginBottom: '8px'}}>
@@ -308,16 +344,12 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                                     <Button style={{fontFamily: 'Lato, sans-serif'}} variant="danger" size="sm" onClick={() => handleDeleteReview(review.reviewID)}>Delete</Button>
                                 </div>
                             )}
-                            {currentUser && currentUser.id !== review.userID && (
-                                <Button style={{fontFamily: 'Open Sans, sans-serif'}} variant="primary"  size="sm"  className="ml-auto" onClick={() => toggleFollow(review)}>
-                                    {review.isFollowing ? 'Unfollow' : 'Follow'}
-                                </Button>
-                            )}
                         </div>
                         )) : (
                     <p style={{fontFamily: 'Roboto, sans-serif', fontWeight: 'bold', fontSize: '18px', alignContent: 'center'}}>No reviews yet. Be the first to write one!</p>
-                    )}
+                )}
                        {renderPagination()}
+                       
                     {isLoggedIn && (
                     <Form onSubmit={handleReviewSubmit} className="mt-3">
                         <Form.Group className="mb-2">
@@ -332,19 +364,12 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                                     <i key={star} className={`fa fa-star${rating >= star ? ' checked' : ''}`} onClick={() => setRating(star)} style={{ cursor: 'pointer', color: rating >= star ? 'gold' : 'grey' }}></i>
                                 ))}
                             </div>
+                            {rating === 0 && showErrorMessage && <div className="text-danger">Rating is required</div>}
                         </Form.Group>
                         <Button style={{fontFamily: 'Lato, sans-serif', marginTop: '10px'}} type="submit" variant="primary">{edit ? 'Update Review' : 'Submit Review'}</Button>
                     </Form>
                       )}
                 </Modal.Body>
-                {/* <Modal.Footer className="d-flex justify-content-between">
-                    <Button variant="secondary" onClick={handleClose}>
-                        Close
-                    </Button>
-                    <Button variant="primary" onClick={handleAddToCart}>
-                        Add To Cart
-                    </Button>
-                </Modal.Footer> */}
             </Modal>
         </Card>
     );

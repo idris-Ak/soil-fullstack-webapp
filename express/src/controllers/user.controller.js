@@ -14,7 +14,7 @@ exports.SignUp = async(req, res) => {
     //Hash the password using bcrypt
     const hashedPassword = await bcrypt.hash(password, 10); 
     //Get the date joined from the database without the time
-    const dateJoined = new Date().toISOString().split('T')[0];
+    const dateJoined = new Date().toLocaleDateString();
     //Create a new user and store details in the database
     const newUser = await db.user.create({
         name,
@@ -37,7 +37,7 @@ exports.Login = async(req, res) => {
         const user = await db.user.findOne({where: {email}});
         //Compare inputted password and password in the database to give access to user
         if(user && await bcrypt.compare(password, user.password)) {
-            res.send({ message: `Welcome ${user.name}!`, user: { id: user.id, name: user.name, email: user.email,  dateJoined: user.dateJoined.toISOString().split('T')[0] } }); 
+            res.send({ message: `Welcome ${user.name}!`, user: { id: user.id, name: user.name, email: user.email,  dateJoined: user.dateJoined.toLocaleDateString()} }); 
         }
         else{
             res.status(401).send({message: "Invalid Email/Password"});
@@ -84,7 +84,7 @@ exports.updateUser = async (req, res) => {
         //Make sure the dateJoined is still in yyyy/mm/dd format 
         if (updatedUser) {
             //Make sure the dateJoined is still in yyyy/mm/dd format 
-            updatedUser.dataValues.dateJoined = updatedUser.dateJoined.toISOString().split('T')[0];
+            updatedUser.dataValues.dateJoined = updatedUser.dateJoined.toLocaleDateString();
             res.json({ message: "User updated successfully.", user: updatedUser });
         } else {
             return res.status(404).send({ message: "User not found or no new data provided." });

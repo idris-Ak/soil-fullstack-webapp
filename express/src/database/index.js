@@ -68,13 +68,23 @@ db.adminActions.belongsTo(db.admin, { foreignKey: 'adminID' });
 // Include a sync option with seed data logic included.
 db.sync = async () => {
   // Sync schema.
-  await db.sequelize.sync();
-  // await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-  // // Can sync with force if the schema has become out of date - note that syncing with force is a destructive operation.
-  // await db.sequelize.sync({ force: true });
-  // await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
-  
-  await seedData();
+  try {
+        // Disable foreign key checks
+        // await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+    
+        // Sync the database
+        await db.sequelize.sync();
+        // await db.sequelize.sync({ alter: true });
+        
+        // Re-enable foreign key checks
+        // await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+        
+    
+    //Seed the database
+    await seedData();
+  } catch (error) {
+    console.error('Failed to sync database:', error);
+  }
 };
 
 async function seedData() {

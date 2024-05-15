@@ -6,6 +6,7 @@ module.exports = (express, app) => {
     router.put('/:reviewID', controller.editReview);
     router.delete('/:reviewID', controller.deleteReview);
     router.post('/follow/:followingID', controller.followUsers);
+    router.delete('/follow/:followingID', controller.followUsers);
     router.get('/:productID', controller.getReviews); 
 
     // Add routes to server
