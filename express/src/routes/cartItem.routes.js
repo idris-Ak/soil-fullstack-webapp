@@ -3,7 +3,8 @@ module.exports = (express, app) => {
   const router = express.Router();
 
   // Select add all router methods (get, post, etc)
-
+  router.post("/",controller.AddtoCart)
+  router.get("/:cartID",controller.GetItems)
   // Add routes to server.
   app.use("/api/cartItem", router);
 };

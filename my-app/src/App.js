@@ -16,7 +16,7 @@ import Payment from './pages/checkout/Payment'
 import Checkout from './pages/checkout/Checkout'
 import Summary from './pages/checkout/Summary'
 import DietPlan from './pages/dietPlan'
-import { initItems } from './repository/shopItems'; //Import shop items and functions
+import {  initCart, getUserCartID} from './repository/shopItems'; //Import shop items and functions
 import axios from 'axios';
 
 
@@ -24,40 +24,63 @@ function App() {
   const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('currentUser')) || null);
   const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
   const [cart, setCart] = useState([]);
+  const [cartID, setCartID] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
+
   //Function to add item to cart
-  const addToCart = (newItem, amount) => {
-    //if item exsist in cart conditional statement add to quantity to that item
-    if(amount === 0){
-      return;
+  const addToCart = async (newItem, amount) => {
+    if (amount === 0) return;
+    
+    const cartItem = cart.find(item => item.productID === newItem.productID);
+    if (cartItem) {
+      const updatedQuantity = cartItem.quantity + amount;
+      await updateCartItem(cartItem.id, updatedQuantity);
+    } else {
+      await addNewItemToCart(newItem, amount);
     }
-    if(cart.some(item => item.id === newItem.id)){
-      const updatedCart = (cart.map (item =>
-           item.id === newItem.id ? {...item, quantity: item.quantity + amount} : item
-        )
-      )
-      setCart(updatedCart);
-      return;
+  };
+  const addNewItemToCart = async (item, quantity) => {
+    console.log(cartID);
+    console.log(item.productID);
+    console.log(quantity);
+    console.log(item.price);
+    try {
+      const response = await axios.post("http://localhost:4000/api/cartItem", {
+        cartID: cartID, // Ensure you have the cartID available
+        productID: item.productID,
+        quantity,
+        price: item.price
+      });
+      if (response.status === 200) {
+        setCart([...cart, { ...item, quantity }]);
+      }
+    } catch (error) {
+      console.error('Error adding item to cart:', error);
     }
-    //adds item to cart with initilal quantity of 1
-    setCart([
-      ...cart,
-      {...newItem, quantity:amount}
-    ]);
+  };
+  
+  const updateCartItem = async (itemId, quantity) => {
+    try {
+      const response = await axios.put(`http://localhost:4000/api/cartItem/${itemId}`, { quantity });
+      if (response.status === 200) {
+        setCart(cart.map(item => item.id === itemId ? { ...item, quantity } : item));
+      }
+    } catch (error) {
+      console.error('Error updating cart item:', error);
+    }
   };
 
-  // Function to remove item from cart
-  const removeFromCart = (removeItem, amount) => {
-    //removing one item at a time and if the item goes to 0 in quantity it is deleted
+  const removeFromCart = async (removeItem, amount) => {
     const updatedCart = cart.reduce((acc, item) => {
       if (item.id === removeItem.id) {
-        if (item.quantity > amount) {
-          // Decrease quantity if more than one
-          acc.push({ ...item, quantity: item.quantity - amount });
+        const updatedQuantity = item.quantity - amount;
+        if (updatedQuantity > 0) {
+          updateCartItem(item.id, updatedQuantity);
+          acc.push({ ...item, quantity: updatedQuantity });
+        } else {
+          deleteCartItem(item.id);
         }
-        // If quantity is 1, do not add to the accumulator, effectively removing it
       } else {
-        //Add item to accumulator if not the item to remove
         acc.push(item);
       }
       return acc;
@@ -65,27 +88,27 @@ function App() {
 
     setCart(updatedCart);
   };
+
+  const deleteCartItem = async (itemId) => {
+    try {
+      const response = await axios.delete(`http://localhost:4000/api/cartItem/${itemId}`);
+      if (response.status === 200) {
+        setCart(cart.filter(item => item.id !== itemId));
+      }
+    } catch (error) {
+      console.error('Error deleting cart item:', error);
+    }
+  };
+
   const removeAllFromCart = () => {
     setCart([]);
-    localStorage.setItem("cart", JSON.stringify([]));
     console.log("removeAll From Cart executed");
   };
 
   useEffect(() => {
-    //initialize the shop products
-    initItems();
     if (!isMounted) {
       setIsMounted(true);
-      //Retrieve cart data from local storage
-      const storedCart = JSON.parse(localStorage.getItem("cart"));
-    
-      //Check if there's any cart data in local storage
-      if (storedCart) {
-        setCart(storedCart);
-      } else {
-        //If no cart data found, initialize cart state to an empty array
-        setCart([]);
-      }
+
     }
   }, [isMounted]);
   
@@ -93,31 +116,56 @@ function App() {
   useEffect(() => {
     if (isMounted) {
       localStorage.setItem("cart", JSON.stringify(cart));
+      // updateCart(cart,user);
     }
   }, [cart, isMounted]);
+
   
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
 
   const loginUser = async (userDetails) => {
     try {
-      //Try to get connection with api
-        const response = await axios.post('http://localhost:4000/api/user/Login', userDetails);
-        //If the user successfully logs in then update the states
-        if (response.status === 200 && response.data.user) {
-          localStorage.setItem('currentUser', JSON.stringify(response.data.user));
-          localStorage.setItem('isLoggedIn', 'true');
-            setCurrentUser(response.data.user);
-            setIsLoggedIn(true);
-            return response;
-        } else {
-            //If the status code is not 200, output an error
-            throw new Error(response.data.message || "Invalid credentials");
-        }
+      const response = await axios.post('http://localhost:4000/api/user/Login', userDetails);
+      if (response.status === 200 && response.data.user) {
+        localStorage.setItem('currentUser', JSON.stringify(response.data.user));
+        localStorage.setItem('isLoggedIn', 'true');
+        setCurrentUser(response.data.user);
+        setIsLoggedIn(true);
+
+        return response;
+      } else {
+        throw new Error(response.data.message || "Invalid credentials");
+      }
     } catch (error) {
-        console.error('Login error:', error.response?.data.message || "No error message from server");
-        throw error; // Rethrow the error to handle it in the calling function
+      console.error('Login error:', error.response?.data.message || "No error message from server");
+      throw error;
     }
-};
+  };
+
+
+  useEffect(() => {
+    
+    const initializeCartAndFetchID = async () => {
+      if (currentUser) {
+        // Initialize the cart
+        console.log("initCart 2 called");
+        const storedCart = await initCart(currentUser);
+        if (Array.isArray(storedCart)) {
+          setCart(storedCart);
+        } else {
+          console.log("Cart retrieved was not an array, cart set to null");
+          setCart([]);
+        }
+  
+        // Fetch the cart ID
+        console.log("getUserCartID called");
+        const retrievedCartID = await getUserCartID(currentUser);
+        setCartID(retrievedCartID);
+      }
+    };
+    console.log("initializeCartAndFetchID");
+    initializeCartAndFetchID();
+  }, [currentUser]);
 
   useEffect(() => {
     if (!isMounted) {
@@ -139,7 +187,8 @@ function App() {
     localStorage.setItem('currentUser', JSON.stringify(user));
     setCurrentUser(user);
   };
-  
+
+
 
   return (
     <div>
