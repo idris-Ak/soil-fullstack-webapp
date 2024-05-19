@@ -13,6 +13,15 @@ const getShopItems = async () => {
 }
 
 const initCart = async (User) => {
+  if (User == null){
+    console.log("user is null")
+
+    return [];
+  }
+  else{
+    console.log("user is :", User)
+
+  }
   
 
   let id = User.id;
