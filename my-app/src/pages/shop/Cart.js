@@ -75,7 +75,7 @@ function Cart({ cart, addToCart, removeFromCart }) {
           <div><h5><b>Summary</b></h5></div> {/* Summary title */}
           <hr />
           <div className="row"> {/* Row for summary details */}
-            <div className="col" style={{ paddingLeft: '0' }}>ITEMS {cartAmount()}</div> {/* Number of items */}
+            <div className="col" style={{ paddingLeft: '0' }} data-testid="item-count">ITEMS {cartAmount()}</div> {/* Number of items */}
             <div className="col text-right">${totalPrice(0).toFixed(2)}</div> {/* Total price */}
           </div>
           <form>
