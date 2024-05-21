@@ -6,14 +6,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         autoIncrement: true
     },
-    adminUsername: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    adminPassword: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
  }, {
     tableName: 'Admins'
  });

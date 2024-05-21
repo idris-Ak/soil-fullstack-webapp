@@ -26,6 +26,11 @@ module.exports = (sequelize, DataTypes) => {
     dateJoined: {
       type: DataTypes.DATE,
       allowNull: false
+    },
+
+    status: {
+      type: DataTypes.STRING,
+      defaultValue: 'active'
     }
   }, {
     tableName: 'Users'

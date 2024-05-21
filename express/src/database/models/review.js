@@ -34,6 +34,10 @@ const Review = sequelize.define('Review', {
       dateCreated: {
         type: DataTypes.DATE,
         allowNull: false 
+      },
+      status: {
+        type: DataTypes.STRING,
+        defaultValue: 'active'  //Values can be 'active', 'flagged', 'deleted'
       }
   }, {
     tableName: 'Reviews'
