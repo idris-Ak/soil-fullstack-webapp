@@ -28,81 +28,79 @@ function App() {
   const [isMounted, setIsMounted] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
 
-  //Function to add item to cart
-  const addToCart = async (newItem, amount) => {
-    if (amount === 0) return;
 
-    console.log("the product id is", newItem.productID);
 
-    const cartItem = cart.find(item => item.productID === newItem.productID);
-    
-    if (cartItem) {
-      console.log("id for the cart is :", cartItem.cartItemID);
+const addToCart = async (newItem, amount) => {
+  if (amount === 0) return;
 
-      const updatedQuantity = cartItem.quantity + amount;
-      await updateCartItem(cartItem.cartItemID, updatedQuantity);
-    } else {
-      await addNewItemToCart(newItem, amount);
-    }
-  };
-  const addNewItemToCart = async (item, quantity) => {
-    try {
-      const response = await axios.post("http://localhost:4000/api/cartItem", {
-        cartID: cartID, // Ensure you have the cartID available
-        productID: item.productID,
-        quantity,
-        price: item.price
-      });
-      if (response.status === 200) {
-        setCart([...cart, { ...item, quantity, cartItemID: response.data.cartItemID  }]);
-      }
-    } catch (error) {
-      console.error('Error adding item to cart:', error);
-    }
-  };
+  const cartItem = cart.find(item => item.productID === newItem.productID);
   
-  const updateCartItem = async (itemId, quantity) => {
-    console.log("itemId  is: ",itemId);
+  if (cartItem) {
+    const updatedQuantity = cartItem.quantity + amount;
+    await updateCartItem(cartItem.cartItemID, updatedQuantity);
+  } else {
+    await addNewItemToCart(newItem, amount);
+  }
+};
 
-    try {
-      const response = await axios.put(`http://localhost:4000/api/cartItem/${itemId}`, { quantity });
-      if (response.status === 200) {
-        setCart(cart.map(item => item.cartItemID === itemId ? { ...item, quantity } : item));
-      }
-    } catch (error) {
-      console.error('Error updating cart item:', error);
+const addNewItemToCart = async (item, quantity) => {
+  try {
+    const response = await axios.post("http://localhost:4000/api/cartItem", {
+      cartID: cartID,
+      productID: item.productID,
+      quantity,
+      price: item.price
+    });
+    if (response.status === 200) {
+      setCart([...cart, { ...item, quantity, cartItemID: response.data.cartItemID }]);
     }
-  };
-  
-  const removeFromCart = async (removeItem, amount) => {
-    const updatedCart = cart.reduce((acc, item) => {
-      if (item.cartItemID === removeItem.cartItemID) {
-        const updatedQuantity = item.quantity - amount;
-        if (updatedQuantity > 0) {
-          updateCartItem(item.cartItemID, updatedQuantity);
-          acc.push({ ...item, quantity: updatedQuantity });
-        } else {
-          deleteCartItem(item.cartItemID);
-        }
+  } catch (error) {
+    console.error('Error adding item to cart:', error);
+  }
+};
+
+const updateCartItem = async (itemId, quantity) => {
+  try {
+    const response = await axios.put(`http://localhost:4000/api/cartItem/${itemId}`, { quantity });
+    if (response.status === 200) {
+      setCart(cart.map(item => item.cartItemID === itemId ? { ...item, quantity } : item));
+    }
+  } catch (error) {
+    console.error('Error updating cart item:', error);
+  }
+};
+
+const removeFromCart = async (removeItem, amount) => {
+  const updatedCart = cart.reduce((acc, item) => {
+    if (item.cartItemID === removeItem.cartItemID) {
+      const updatedQuantity = item.quantity - amount;
+      if (updatedQuantity > 0) {
+        updateCartItem(item.cartItemID, updatedQuantity);
+        acc.push({ ...item, quantity: updatedQuantity });
       } else {
-        acc.push(item);
+        deleteCartItem(item.cartItemID);
       }
-      return acc;
-    }, []);
-
-    setCart(updatedCart);
-  };
-
-  const deleteCartItem = async (itemId) => {
-    try {
-      const response = await axios.delete(`http://localhost:4000/api/cartItem/${itemId}`);
-      if (response.status === 200) {
-        setCart(cart.filter(item => item.cartItemID !== itemId));
-      }
-    } catch (error) {
-      console.error('Error deleting cart item:', error);
+    } else {
+      acc.push(item);
     }
-  };
+    return acc;
+  }, []);
+
+  setCart(updatedCart);
+};
+
+const deleteCartItem = async (itemId) => {
+  try {
+    const response = await axios.delete(`http://localhost:4000/api/cartItem/${itemId}`);
+    if (response.status === 200) {
+      setCart(cart.filter(item => item.cartItemID !== itemId));
+    }
+  } catch (error) {
+    console.error('Error deleting cart item:', error);
+  }
+};
+
+
 
   const removeAllFromCart = () => {
     setCart([]);

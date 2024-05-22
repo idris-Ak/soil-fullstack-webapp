@@ -1,6 +1,5 @@
 import axios from "axios";
 
-const CART = "cart"
 
 // retrieve all products from database 
 const getShopItems = async () => {
@@ -106,16 +105,6 @@ const getUserCartID = async (User) => {
 };
 
 
-
-function clearCart() {
-  localStorage.setItem(CART, JSON.stringify([]));
-}
-
-const updateCart = async () => {
-  
-
-}
-
   // Function to retrieve special shop items
   export const getSpecialItems = async () => {
     try {
@@ -130,8 +119,6 @@ const updateCart = async () => {
   export {
     getShopItems,
     initCart,
-    clearCart,
     returnCart,
-    updateCart,
     getUserCartID
   };
