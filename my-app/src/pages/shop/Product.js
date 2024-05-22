@@ -229,7 +229,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
 
     const renderSortOptions = () => (
         //Styling for the sorting options of the reviews
-        <DropdownButton title={`Sort by: ${sortOrder}`} id="sort-dropdown" onSelect={handleSortChange} className="mb-3">
+        <DropdownButton title={`Sort by: ${sortOrder}`} id="sort-dropdown" onSelect={handleSortChange} className="mb-3" variant="outline-primary">
             <Dropdown.Item eventKey="Latest">Latest</Dropdown.Item>
             <Dropdown.Item eventKey="Highest">Highest Rating</Dropdown.Item>
             <Dropdown.Item eventKey="Lowest">Lowest Rating</Dropdown.Item>
@@ -328,7 +328,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                             </div>
                                 <strong>{review.user.name}</strong>
                                 {currentUser && currentUser.id !== review.userID && (
-                                <Button style={{fontFamily: 'Open Sans, sans-serif', marginLeft: '10px'}} variant="info"  size="sm"  className="ml-auto" onClick={() => toggleFollow(review)}>
+                                <Button style={{fontFamily: 'Open Sans, sans-serif', marginLeft: '10px'}} variant="outline-secondary" size="sm"  className="ml-auto" onClick={() => toggleFollow(review)}>
                                     {review.isFollowing ? 'Unfollow' : 'Follow'}
                                 </Button>
                             )}
