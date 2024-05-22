@@ -7,6 +7,7 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 - When users are prompted to login for the cart and diet planner, they will be redirected to the profile page instead of the cart/diet planner page after successfully logging in, as per the specifications.
 - Images and icons are stored in the public folder.
 - More product information and the reviews can be displayed by clicking on the product image or name.
+- The reviews have a maximum character limit of 100 characters as per the specifications. 
 
 ## ER Diagram
 - 'NN' stands for 'Not Null' 

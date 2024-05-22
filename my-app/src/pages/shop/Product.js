@@ -20,6 +20,8 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [sortOrder, setSortOrder] = useState('Latest'); //State for managing sort order
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleteReviewID, setDeleteReviewID] = useState(null);
     const navigate = useNavigate();
     const reviewsPerPage = 3;
 
@@ -64,23 +66,18 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
 
     const handleReviewSubmit = async (event) => {
         event.preventDefault(); 
-        //If the user is not logged in, navigate them to the login page
-        if (!isLoggedIn || !currentUser) {
-            navigate('/Login');
-            return;
-        }
         const currentDate = new Date().toISOString(); // Create a date string in ISO format
         
         //Set review attributes
         const reviewData = {
             productID: item.productID,
-            userID: currentUser.id, // Send null if anonymous is true
+            userID: currentUser.id,
             reviewText: newReview,
             numberOfStars: rating,
-            dateCreated: currentDate, // Include the current date when submitting the review
+            dateCreated: currentDate, //Include the current date when submitting the review
         };
 
-        //Check if the review is between 1-100 words
+        //Check if the review is between 1-100 characters
         if (newReview.length > 0 && newReview.length <= 100 && rating > 0) {
             //Fetch reviews based upon if the user is editing the review or not
             const fetchReviews = edit ? `http://localhost:4000/api/review/${editReviewID}` : 'http://localhost:4000/api/review';
@@ -95,14 +92,9 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             try{
                 console.log("Review submitted:", response.data);
                 //Set reviews based on if the attributes of the review and the following state were updated
-                let updatedReviews = [...reviews, {
-                    ...response.data,
-                    isFollowing: response.data.user.id === currentUser.id ? false : true // Set to false if the review is by the current user
-                }];
-                if (edit) {
-                    updatedReviews = reviews.map(r => r.reviewID === response.data.reviewID ? { ...r, ...response.data } : r);
-                } else {
-                    updatedReviews = [...reviews, { ...response.data, isFollowing: false }];
+                const updatedReviews = reviews.map(r => r.reviewID === response.data.reviewID ? { ...r, ...response.data } : r);
+                if (!edit) {
+                  updatedReviews.push({ ...response.data, isFollowing: false });
                 }
 
                 setReviews(updatedReviews); 
@@ -146,6 +138,16 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         setRating(review.numberOfStars);
     };
 
+    const handleDeleteClick = (reviewID) => {
+        setDeleteReviewID(reviewID);
+        setShowDeleteConfirm(true);
+    };
+
+    const confirmDelete = async () => {
+        setShowDeleteConfirm(false);
+        handleDeleteReview(deleteReviewID);
+    };
+
     const handleDeleteReview = async(reviewID) => {
         try{
             //Delete the review from the database
@@ -182,30 +184,54 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         }
     };
 
-    const toggleFollow = async (review) => {
-        //Get the current followers of the logged in user from the database
-        const method = review.isFollowing ? 'delete' : 'post';
-        const endpoint = `http://localhost:4000/api/review/follow/${review.userID}`;
-        try {
-            await axios({
-                method: method,
-                url: endpoint,
-                data: {
-                    followerID: currentUser.id // Ensuring followerID is being sent
-                }
-            });
-            console.log("Follow toggled for user:", review.userID);
-            //If the user follows another user, change the following status to true otherwise if they decide to unfollow someone, change the following status to false
-            setReviews(prevReviews => prevReviews.map(r => {
-                if (r.user.id === review.userID) {
-                    return {...r, isFollowing: !r.isFollowing};
-                }
-                return r;
-            }));
-        } catch (error) {
-            console.error('Error toggling follow status', error);
-        }
+    const updateReviews = (userID, newFollowStatus) => {
+        setReviews(prevReviews => prevReviews.map(review => {
+            if (review.user.id === userID) {
+                return { ...review, isFollowing: newFollowStatus };
+            }
+            return review;
+        }));
     };
+
+    const FollowButton = ({ review, currentUser, updateReviews }) => {
+        const [isFollowing, setIsFollowing] = useState(review.isFollowing);
+      
+        const toggleFollow = async () => {
+          const method = isFollowing ? 'delete' : 'post';
+          const endpoint = `http://localhost:4000/api/review/follow/${review.userID}`;
+          try {
+            await axios({
+              method: method,
+              url: endpoint,
+              data: { followerID: currentUser.id }
+            });
+            setIsFollowing(!isFollowing);
+            updateReviews(review.userID, !isFollowing);
+          } catch (error) {
+            console.error('Error toggling follow status', error);
+          }
+        };
+      
+        return (
+            <Dropdown show={isFollowing}>
+              <Dropdown.Toggle 
+                variant={isFollowing ? "success" : "outline-secondary"} 
+                id="dropdown-basic" 
+                size="sm"
+                onClick={!isFollowing ? toggleFollow : null}
+              >
+                {isFollowing ? "Following" : "Follow"}
+              </Dropdown.Toggle>
+              {isFollowing && (
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={toggleFollow}>Unfollow</Dropdown.Item>
+                </Dropdown.Menu>
+              )}
+            </Dropdown>
+          );
+        };
+      
+    
 
     const handleClose = () => setProductDetails(false);
     const handleShow = () => setProductDetails(true);
@@ -214,6 +240,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         if(isLoggedIn){
             addToCart(item, quantity); // Add the item to the cart with selected quantity
             setShowNotification(true); // Show the notification
+            setProductDetails(false); // Close the modal
             setTimeout(() => setShowNotification(false), 2000); // Hide after 2 seconds
             }
         else{
@@ -289,7 +316,6 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             </Card.Body>
 
             <Modal show={showProductDetails} onHide={handleClose} centered size='lg'>
-            {showErrorMessage && errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
                 <Modal.Header closeButton>
                     <Modal.Title style={{fontFamily: 'Open Sans, sans-serif'}} className="text-center">{item.name}</Modal.Title>
                 </Modal.Header>
@@ -313,10 +339,17 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                     </div>
                 {/* Section for reviews */}
                 <hr />
+                {showErrorMessage && errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
                     <h3 style={{fontFamily: 'Open Sans, sans-serif', fontWeight: 'bold'}} >Reviews</h3>
                     {renderSortOptions()}
                     {reviews.length > 0 ? reviews.map((review, index) => (
                         <div key={`${review.reviewID}-${index}`}  className="review-item" style={{ fontFamily: 'Roboto, sans-serif', borderBottom: '1px solid #e0e0e0'}}>
+                            {review.reviewText === "[**** This review has been deleted by the admin ***]" ? (
+                             <div style={{ marginTop: '50px', marginBottom: '50px' }}>
+                                <i>{review.reviewText}</i>
+                            </div>
+                            ) : (
+                            <>
                             <div style={{marginTop: '10px'}} className="rating">
                                 {/* OpenAI (2024) ChatGPT [Large language model], accessed 13 May 2024. (*Link could not be generated successfully*) */}
                                 {[...Array(review.numberOfStars)].map((_, i) => (
@@ -328,9 +361,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                             </div>
                                 <strong>{review.user.name}</strong>
                                 {currentUser && currentUser.id !== review.userID && (
-                                <Button style={{fontFamily: 'Open Sans, sans-serif', marginLeft: '10px'}} variant="outline-secondary" size="sm"  className="ml-auto" onClick={() => toggleFollow(review)}>
-                                    {review.isFollowing ? 'Unfollow' : 'Follow'}
-                                </Button>
+                                <FollowButton review={review} currentUser={currentUser} updateReviews={updateReviews} />
                             )}
                                 <span style={{ float: 'right', fontSize: '0.8em', color: 'gray' }}>{new Date(review.dateCreated).toLocaleDateString()}</span>
                                 <br />
@@ -341,9 +372,11 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                             {currentUser && currentUser.id === review.userID && (
                                 <div style={{marginBottom: '10px'}} className="d-flex justify-content-between">
                                     <Button style={{fontFamily: 'Lato, sans-serif'}} variant="info" size="sm" onClick={(event) => handleEdit(event, review)}>Edit</Button>
-                                    <Button style={{fontFamily: 'Lato, sans-serif'}} variant="danger" size="sm" onClick={() => handleDeleteReview(review.reviewID)}>Delete</Button>
+                                    <Button style={{fontFamily: 'Lato, sans-serif'}} variant="danger" size="sm" onClick={() => handleDeleteClick(review.reviewID)}>Delete</Button>
                                 </div>
-                            )}
+                                )}
+                            </>
+                        )}
                         </div>
                         )) : (
                     <p style={{fontFamily: 'Roboto, sans-serif', fontWeight: 'bold', fontSize: '18px', alignContent: 'center'}}>No reviews yet. Be the first to write one!</p>
@@ -370,6 +403,16 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                     </Form>
                       )}
                 </Modal.Body>
+            </Modal>
+            <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Deletion</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Are you sure you want to delete this review?</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>Cancel</Button>
+                    <Button variant="danger" onClick={confirmDelete}>Delete</Button>
+                </Modal.Footer>
             </Modal>
         </Card>
     );

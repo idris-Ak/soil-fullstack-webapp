@@ -19,6 +19,11 @@ const typeDefs = gql`
     status: String!
   }
 
+
+  type ReviewDeletion {
+  reviewID: ID!
+  }
+
   type Query {
     users: [User]
     reviews: [Review]
@@ -27,13 +32,14 @@ const typeDefs = gql`
 
   type Mutation {
     toggleUserStatus(userID: ID!): User
-    deleteReview(reviewID: ID!): Review
-    flagReview(reviewID: ID!, reason: String!): Review
+    deleteReview(reviewID: ID!, isAdmin: Boolean!): ReviewDeletion
+    flagReview(reviewID: ID!): Review
   }
 
   type Subscription {
+    reviewUpdated: Review
     reviewFlagged: Review
-    reviewDeleted: Review
+    reviewDeleted: ReviewDeletion
   }
 `;
 

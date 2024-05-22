@@ -12,9 +12,10 @@ const http = require('http');
 // Database will be sync'ed in the background.
 db.sync();
 
-const schema = makeExecutableSchema({ typeDefs, resolvers });
 const app = express();
 const httpServer = http.createServer(app);
+
+const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 const subscriptionServer = SubscriptionServer.create({
   schema,
@@ -27,10 +28,7 @@ const subscriptionServer = SubscriptionServer.create({
 
 const server = new ApolloServer({
   schema,
-  formatError: (error) => {
-    console.log(error);
-    return error;
-  },
+  context: () => ({ db }),
   plugins: [{
     async serverWillStart() {
       return {
@@ -40,7 +38,6 @@ const server = new ApolloServer({
       };
     }
   }],
-  context: () => ({ db }),
 });
 
 
@@ -58,21 +55,11 @@ app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
-// Simple Hello World route.
-app.get("/", (req, res) => {
-  res.json({ message: "Hello World!" });
-});
-
-// Add user routes.
-// examples
 require("./src/routes/user.routes.js")(express, app);
 require("./src/routes/product.routes.js")(express, app);
 require("./src/routes/shoppingCart.routes.js")(express, app);
-require("./src/routes/admin.routes.js")(express, app);
-require("./src/routes/adminActions.routes.js")(express, app);
 require("./src/routes/cartItem.routes.js")(express, app);
 require("./src/routes/review.routes.js")(express, app);
-require("./src/routes/moderateReview.routes.js")(express, app);
 
 // Set port, listen for requests.
 db.sequelize.sync().then(() => {
