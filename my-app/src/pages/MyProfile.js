@@ -38,6 +38,47 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
   }, [currentUser, navigate]);
 
   const handleSaveChanges = async() => {
+  //Handle case where old password is entered but new password is not yet provided
+  if (editDetails.oldPassword && (!editDetails.newPassword || !editDetails.confirmNewPassword)) {
+    setAlertContentDanger("Please enter and confirm your new password.");
+    setAlertDanger(true);
+    setTimeout(() => {
+      setAlertDanger(false);
+    }, 2500);
+    return;
+  }
+
+  //Handle case where new password and confirm new password is entered but old password is not yet provided
+  if (editDetails.newPassword && editDetails.confirmNewPassword && (!editDetails.oldPassword)) {
+    setAlertContentDanger("Please enter your old password.");
+    setAlertDanger(true);
+    setTimeout(() => {
+      setAlertDanger(false);
+    }, 2500);
+    return;
+  }
+
+  //Handle case where confirm new password is entered but new password or old password is not yet provided
+  if (editDetails.confirmNewPassword && (!editDetails.newPassword || !editDetails.oldPassword)) {
+    setAlertContentDanger("Please enter your old and new password.");
+    setAlertDanger(true);
+    setTimeout(() => {
+      setAlertDanger(false);
+    }, 2500);
+    return;
+  }
+
+  
+  //Handle case where new password is entered but confirm new password or old password is not yet provided
+  if (editDetails.newPassword && (!editDetails.confirmNewPassword|| !editDetails.oldPassword)) {
+    setAlertContentDanger("Please enter your old password and confirm your new password.");
+    setAlertDanger(true);
+    setTimeout(() => {
+      setAlertDanger(false);
+    }, 2500);
+    return;
+  }
+
       //Handle password changes when user is editing their profile
       if (editDetails.newPassword && editDetails.newPassword !== editDetails.confirmNewPassword) {
         setAlertContentDanger("New passwords do not match.");
@@ -75,18 +116,32 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
       setAlert(true);
       setTimeout(() => {
         setAlert(false);
-      }, 2000);
+      }, 2500);
       setEditPage(false);
       }
     } catch(error){
       //If details were not successfully updated, output the appropriate error message 
         setAlertContentDanger(error.response.data.message);
         setAlertDanger(true); 
+        resetPasswordFields();
         setTimeout(() => {
           setAlertDanger(false);
-        }, 2000);
+        }, 2500);
   }
      };
+
+     //Reset the password fields if there is an error within the password inputs of the edit profile
+     const resetPasswordFields = () => {
+      setEditDetails(prevDetails => ({
+        ...prevDetails,
+        oldPassword: '',
+        newPassword: '',
+        confirmNewPassword: ''
+      }));
+      setTimeout(() => {
+        setAlertDanger(false);
+      }, 2500);
+    };
 
      const handleDeleteProfile = async() => {
      try{
