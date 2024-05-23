@@ -23,44 +23,42 @@ const resolvers = {
     //Block/Unblock the user amd save the status to the database
     toggleUserStatus: async (_, { userID }, { db }) => {
       const user = await db.user.findByPk(userID);
+      //Throw an error if the user is not found
+      if (!user) {
+        throw new Error("User not found.");
+      }
+      //Set the user status to active or blocked
       user.status = user.status === 'active' ? 'blocked' : 'active';
       await user.save();
       return user;
     },
     //Delete the user reviews and replace the review test
-    deleteReview: async (_, { reviewID, isAdmin }, { db }) => {
+    deleteReview: async (_, { reviewID }, { db }) => {
       const review = await db.review.findByPk(reviewID);
       if (!review) {
         console.error("Review not found for ID: ", reviewID);
         throw new Error("Review not found.");
       }
-    
-      if (isAdmin) {
         review.status = 'deleted';
         review.reviewText = "[**** This review has been deleted by the admin ***]";
         await review.save();
         pubsub.publish('REVIEW_DELETED', { reviewDeleted: review });
         return review;
-      } else {
-        await review.destroy();
-        pubsub.publish('REVIEW_DELETED', { reviewDeleted: { reviewID } });
-        return { reviewID };
-      }
     },
     //Flag the review if content is deemed inappropriate
     flagReview: async (_, { reviewID }, { db }) => {
-      const review = await db.review.findByPk(reviewID);
-      if (!review) {
-        console.error("Review not found for ID: ", reviewID);
-        throw new Error("Review not found.");
-      }
-      review.status = 'flagged';
-      await review.save();
-      pubsub.publish('REVIEW_FLAGGED', { reviewFlagged: review });
-      console.log("Published flagged review: ", review);
-      return review;
+    const review = await db.review.findByPk(reviewID);
+    if (!review) {
+      console.error("Review not found for ID: ", reviewID);
+      throw new Error("Review not found.");
     }
-  },
+    //Toggle review status between 'active' and 'flagged'
+    review.status = (review.status === 'active' ? 'flagged' : 'active');
+    await review.save();
+    pubsub.publish('REVIEW_FLAGGED', { reviewFlagged: review });
+    return review;
+  }
+},
 
   //Create subscriptions to indicate if review is updated, flagged or deleted 
   Subscription: {

@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
-//Query to get the initial reviews from the server
+//Query to get the initial reviews
 export const GET_INITIAL_REVIEWS = gql`
-query{
+query {
   reviews {
     reviewID
     productID
@@ -13,6 +13,18 @@ query{
     status
     }
   }
+`;
+
+//Query to get the users
+export const GET_USERS = gql `
+query {
+  users {
+    id
+    name
+    email
+    status
+  }
+}
 `;
 
 //Subscription to listen for updates on reviews
@@ -66,6 +78,17 @@ subscription {
 }
 `;
 
+
+//Mutation to toggle the user status
+export const MUTATION_TO_USER_STATUS = gql `
+mutation ToggleUserStatus($userID: ID!) {
+  toggleUserStatus(userID: $userID) {
+    id
+    status
+  }
+}
+`;
+
 //Mutation to flag a review as inappropriate
 export const MUTATION_TO_REVIEW_FLAGGED = gql`
 mutation FlagReview($reviewID: ID!) {
@@ -78,8 +101,8 @@ mutation FlagReview($reviewID: ID!) {
 
 //Mutation to delete a review
 export const MUTATION_TO_REVIEW_DELETED = gql`
-mutation DeleteReview($reviewID: ID!, $isAdmin: Boolean!) {
-  deleteReview(reviewID: $reviewID, isAdmin: $isAdmin) {
+mutation DeleteReview($reviewID: ID!) {
+  deleteReview(reviewID: $reviewID) {
     reviewID
     status
     reviewText

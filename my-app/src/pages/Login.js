@@ -29,9 +29,9 @@ const handleSubmit = async (event) => {
           setShowSuccessAlert(true);
           setTimeout(() => {
             setShowSuccessAlert(false);
-            //Redirect to profile after alert has been shown for 2.5 seconds
+            //Redirect to profile after alert has been shown for 4 seconds
             navigate('/MyProfile');
-        }, 2500);
+        }, 4000);
       } 
       else {
           throw new Error('Login unsuccessful');
