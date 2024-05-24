@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Modal, Form, Alert, Pagination, DropdownButton, Dropdown } from 'react-bootstrap';
+import { Button, Card, Modal, Form, Alert, Pagination, DropdownButton, Dropdown, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import "./product.css";
 import axios from 'axios'
 
@@ -65,50 +65,37 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     }, [showProductDetails, loadReviews, currentPage, sortOrder]);
 
     const handleReviewSubmit = async (event) => {
-        event.preventDefault(); 
-        const currentDate = new Date().toISOString(); // Create a date string in ISO format
-        
+        event.preventDefault();         
         //Set review attributes
         const reviewData = {
             productID: item.productID,
             userID: currentUser.id,
             reviewText: newReview,
             numberOfStars: rating,
-            dateCreated: currentDate, //Include the current date when submitting the review
+            dateCreated: new Date().toISOString(),
         };
 
         //Check if the review is between 1-100 characters
         if (newReview.length > 0 && newReview.length <= 100 && rating > 0) {
             //Fetch reviews based upon if the user is editing the review or not
-            const fetchReviews = edit ? `http://localhost:4000/api/review/${editReviewID}` : 'http://localhost:4000/api/review';
-            let response;
-            //If the user is editing the review, use 'put'
-            if (edit) {
-                response = await axios.put(fetchReviews, reviewData);
-            } else {
-                //Otherwise, use 'post'
-                response = await axios.post(fetchReviews, reviewData);
-            }
+            const endpoint = edit ? `http://localhost:4000/api/review/${editReviewID}` : 'http://localhost:4000/api/review';
+            const method = edit ? 'put' : 'post';
             try{
-                console.log("Review submitted:", response.data);
+                const response = await axios[method](endpoint, reviewData);
                 //Set reviews based on if the attributes of the review and the following state were updated
-                const updatedReviews = reviews.map(r => r.reviewID === response.data.reviewID ? { ...r, ...response.data } : r);
-                if (!edit) {
-                  updatedReviews.push({ ...response.data, isFollowing: false });
-                }
-
+                const updatedReviews = edit ? reviews.map(r => r.reviewID === response.data.reviewID ? { ...r, ...response.data } : r) : [...reviews, response.data];
                 setReviews(updatedReviews); 
-    
                 //Determine if new page is needed
-                const newTotalPages = Math.ceil(updatedReviews.length / reviewsPerPage);
-                if (newTotalPages > totalPages) {
-                     //Move to the new last page
-                    setCurrentPage(newTotalPages); 
-                }
+                // const newTotalPages = Math.ceil(updatedReviews.length / reviewsPerPage);
+                // if (newTotalPages > totalPages) {
+                //      //Move to the new last page
+                //     setCurrentPage(newTotalPages); 
+                // }
                 setNewReview('');
                 setRating(0);
                 setEdit(false);
                 setEditReviewID(null);
+                setCurrentPage(Math.ceil(updatedReviews.length / reviewsPerPage));
             } catch(error){
                 //Send error messages
                 setShowErrorMessage(true);
@@ -145,7 +132,8 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
 
     const confirmDelete = async () => {
         setShowDeleteConfirm(false);
-        handleDeleteReview(deleteReviewID);
+        await handleDeleteReview(deleteReviewID);
+        resetReviewForm();
     };
 
     const handleDeleteReview = async(reviewID) => {
@@ -154,25 +142,16 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             const response = await axios.delete(`http://localhost:4000/api/review/${reviewID}`);
             //If the response status is successful then filter out the deleted reviews from the current reviews
             if (response.status === 200) {
-                const filteredReviews = reviews.filter(review => review.reviewID !== reviewID);
-                setReviews(filteredReviews);
-    
-                // Recalculate total pages after deletion
-                const updatedTotalPages = Math.ceil(filteredReviews.length / reviewsPerPage);
-                setTotalPages(updatedTotalPages);
-    
-                // Adjust current page if necessary
-                if (currentPage > updatedTotalPages) {
-                    setCurrentPage(updatedTotalPages); // Adjust the current page or stay on the first page
-                } else if (currentPage > 1 && filteredReviews.length % reviewsPerPage === 0) {
-                    setCurrentPage(currentPage - 1); // Go to the previous page if the current one is empty
-                }
-                  //Reset the form state if the user was editing a review
-                  setNewReview('');
-                  setRating(0);
-                  setEdit(false);
-                  setEditReviewID(null);
+            //Fetch current reviews again to update state correctly
+            const updatedResponse = await axios.get(`http://localhost:4000/api/review/${item.productID}`, {
+                params: { currentUserID: currentUser ? currentUser.id : null, page: 1, limit: reviewsPerPage, sort: sortOrder }
+            });
+            if (updatedResponse.data) {
+                setReviews(updatedResponse.data.reviews);
+                setTotalPages(updatedResponse.data.totalPages);
+                setCurrentPage(1); //Reset to first page or maintain current if applicable
             }
+        }
         } catch (error) {
             //Send error messages
             setShowErrorMessage(true);
@@ -182,6 +161,13 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             }, 2500);
 
         }
+    };
+
+    const resetReviewForm = () => {
+        setNewReview('');
+        setRating(0);
+        setEdit(false);
+        setEditReviewID(null);
     };
 
     const updateReviews = (userID, newFollowStatus) => {
@@ -203,7 +189,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             await axios({
               method: method,
               url: endpoint,
-              data: { followerID: currentUser.id }
+              data: { followerID: currentUser.id, followingID: review.userID }
             });
             setIsFollowing(!isFollowing);
             updateReviews(review.userID, !isFollowing);
@@ -213,25 +199,20 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         };
       
         return (
-            <Dropdown show={isFollowing}>
-              <Dropdown.Toggle 
-                variant={isFollowing ? "success" : "outline-secondary"} 
-                id="dropdown-basic" 
-                size="sm"
-                onClick={!isFollowing ? toggleFollow : null}
-              >
-                {isFollowing ? "Following" : "Follow"}
-              </Dropdown.Toggle>
-              {isFollowing && (
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={toggleFollow}>Unfollow</Dropdown.Item>
-                </Dropdown.Menu>
-              )}
-            </Dropdown>
-          );
-        };
-      
-    
+            <div>
+                {isFollowing ? (
+                    <Dropdown>
+                        <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic" size="sm"> Following</Dropdown.Toggle>
+                        <Dropdown.Menu>
+                            <Dropdown.Item style={{fontSize: '14px'}} onClick={toggleFollow}>Unfollow</Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
+                ) : (
+                    <Button variant="outline-secondary" size="sm" onClick={toggleFollow}>Follow</Button>
+                )}
+            </div>
+        );
+    };    
 
     const handleClose = () => setProductDetails(false);
     const handleShow = () => setProductDetails(true);
@@ -268,30 +249,30 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         if (totalPages <= 1) return null;
 
         let items = [];
-        //Set the current page based on the number of pages 
+        //Set the current page based on the number of pages
         if (totalPages > 1) {
-            if (currentPage > 1) {
-                items.push(<Pagination.First key="first" onClick={() => paginate(1)} disabled={currentPage === 1} />);
-                items.push(<Pagination.Prev key="prev" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} />);
-            }
-
-            //Change the format of the pagination based on the current page number 
-            const startPage = currentPage > 2 ? currentPage - 2 : 1;
-            const endPage = Math.min(startPage + 4, totalPages);
-            for (let number = startPage; number <= endPage; number++) {
-                items.push(<Pagination.Item key={number} active={number === currentPage} onClick={() => paginate(number)}>{number}</Pagination.Item>);
-            }
-
-            if (currentPage < totalPages) {
-                items.push(<Pagination.Next key="next" onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} />);
-                items.push(<Pagination.Last key="last" onClick={() => paginate(totalPages)} disabled={currentPage === totalPages} />);
-            }
+        if (currentPage > 1) {
+            items.push(<Pagination.First key="first" onClick={() => paginate(1)} disabled={currentPage === 1} />);
+            items.push(<Pagination.Prev key="prev" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} />);
         }
 
+        //Change the format of the pagination based on the current page number
+        const startPage = currentPage > 2 ? currentPage - 2 : 1;
+        const endPage = Math.min(startPage + 4, totalPages);
+        for (let number = startPage; number <= endPage; number++) {
+            items.push(<Pagination.Item key={number} active={number === currentPage} onClick={() => paginate(number)}>{number}</Pagination.Item>);
+        }
+
+        if (currentPage < totalPages) {
+            items.push(<Pagination.Next key="next" onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} />);
+            items.push(<Pagination.Last key="last" onClick={() => paginate(totalPages)} disabled={currentPage === totalPages} />);
+        }
+    }
+
         return (
-            <div style={{marginTop:'20px'}} className="d-flex justify-content-center align-items-center">
-                <div style={{ margin: '0 20px', fontFamily: 'Open Sans, sans-serif' }}>Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong></div>
-                <Pagination className="ml-3 mr-3">{items}</Pagination>
+            <div style={{marginTop:'20px', textAlign: 'center'}}>
+            <div style={{ margin: '0 20px', fontFamily: 'Open Sans, sans-serif' }}>Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong></div>
+                <Pagination className="ml-3 mr-3" style={{ display: 'inline-flex', marginTop: '10px' }}>{items}</Pagination>
             </div>
         );
     };
@@ -344,12 +325,6 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                     {renderSortOptions()}
                     {reviews.length > 0 ? reviews.map((review, index) => (
                         <div key={`${review.reviewID}-${index}`}  className="review-item" style={{ fontFamily: 'Roboto, sans-serif', borderBottom: '1px solid #e0e0e0'}}>
-                            {review.reviewText === "[**** This review has been deleted by the admin ***]" ? (
-                             <div style={{ marginTop: '50px', marginBottom: '50px' }}>
-                                <i>{review.reviewText}</i>
-                            </div>
-                            ) : (
-                            <>
                             <div style={{marginTop: '10px'}} className="rating">
                                 {/* OpenAI (2024) ChatGPT [Large language model], accessed 13 May 2024. (*Link could not be generated successfully*) */}
                                 {[...Array(review.numberOfStars)].map((_, i) => (
@@ -374,8 +349,6 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                                     <Button style={{fontFamily: 'Lato, sans-serif'}} variant="info" size="sm" onClick={(event) => handleEdit(event, review)}>Edit</Button>
                                     <Button style={{fontFamily: 'Lato, sans-serif'}} variant="danger" size="sm" onClick={() => handleDeleteClick(review.reviewID)}>Delete</Button>
                                 </div>
-                                )}
-                            </>
                         )}
                         </div>
                         )) : (
@@ -392,10 +365,24 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                         <Form.Group className="mb-2">
                             <Form.Label style={{fontFamily: 'Open Sans, sans-serif', marginBottom: '10px'}} >Rating:</Form.Label>
                             <div>
-                                {/* Map the integers 1-5 to stars */}
-                                {[1, 2, 3, 4, 5].map(star => (
-                                    <i key={star} className={`fa fa-star${rating >= star ? ' checked' : ''}`} onClick={() => setRating(star)} style={{ cursor: 'pointer', color: rating >= star ? 'gold' : 'grey' }}></i>
-                                ))}
+                        {/* Map the integers 1-5 to stars */}
+                        {[1, 2, 3, 4, 5].map(star => (
+                            <OverlayTrigger
+                            key={star}
+                            placement="top"
+                            overlay={
+                            <Tooltip>
+                                {star === 1 ? "Poor" : star === 5 ? "Excellent" : `${star} Stars`}
+                            </Tooltip>
+                            }
+                            >
+                            <i
+                            className={`fa fa-star${rating >= star ? ' checked' : ''}`}
+                            onClick={() => setRating(star)}
+                            style={{ cursor: 'pointer', color: rating >= star ? 'gold' : 'grey' }}
+                            ></i>
+                            </OverlayTrigger>
+                        ))}                             
                             </div>
                             {rating === 0 && showErrorMessage && <div className="text-danger">Rating is required</div>}
                         </Form.Group>

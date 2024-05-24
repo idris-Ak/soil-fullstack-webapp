@@ -7,7 +7,7 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 - When users are prompted to login for the cart and diet planner, they will be redirected to the profile page instead of the cart/diet planner page after successfully logging in, as per the specifications.
 - Images and icons are stored in the public folder.
 - More product information and the reviews can be displayed by clicking on the product image or name.
-- The reviews have a maximum character limit of 100 characters as per the specifications. 
+- The reviews have a maximum character limit of 100 characters as per the specifications and the ranking of each star can be seen by hovering over each star.
 
 ## ER Diagram
 - 'NN' stands for 'Not Null' 
@@ -16,11 +16,12 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 ## How To Run The Program
 1. Ensure Node.js is installed so that you can install the project dependencies if required. Use this link to install Node.js if not already installed:
     - `https://nodejs.org/en/download`
-2. Install necessary dependencies by running `npm install` in your terminal if the dependencies aren't already installed. 
+2. Install necessary dependencies by running `npm install` in the 'my-app' folder, 'express' folder and 'admin-app' folder in your terminal if the dependencies aren't already installed. 
 3. Navigate to the express folder by running `cd express` in your terminal.
 4. Start the server by executing `node server.js` in your terminal.
 5. On a separate terminal, navigate to the front end code by running `cd my-app` in your terminal.
-6. Start the program by executing `npm start` in the terminal.
+6. To start the admin dashboard front end code, go to the 'admin-app' folder by running `cd admin` and then cd `admin-app` in your terminal.  
+7. Start the program by executing `npm start` in the terminal.
 
 ## References For Product Images
 *Organic Apples*

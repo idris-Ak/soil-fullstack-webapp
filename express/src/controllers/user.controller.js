@@ -38,10 +38,6 @@ exports.Login = async(req, res) => {
         if (!user) {
             return res.status(401).send({ message: "Invalid Email/Password" });
         }
-        //Check if the user is blocked
-        if (user.status === 'blocked') {
-            return res.status(403).send({ message: "Your account has been blocked. Please contact the admin." });
-        }
         //Compare inputted password and password in the database to give access to user
         if(user && await bcrypt.compare(password, user.password)) {
             res.send({ user: { id: user.id, name: user.name, email: user.email,  dateJoined: user.dateJoined.toISOString().split('T')[0] } }); 

@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Container, Grid, Card, CardContent, Typography, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ThemeProvider, createTheme } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { useQuery, useSubscription, useMutation } from '@apollo/client';
 import { GET_INITIAL_REVIEWS, SUBSCRIBE_TO_REVIEW_UPDATES, SUBSCRIBE_TO_REVIEW_DELETED, SUBSCRIBE_TO_REVIEW_FLAGGED, MUTATION_TO_REVIEW_FLAGGED, MUTATION_TO_REVIEW_DELETED, MUTATION_TO_USER_STATUS, GET_USERS} from './apollo/queries';
 import { ToastContainer, toast } from 'react-toastify';
 import Filter from 'bad-words';
+import profaneWords from 'profane-words';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import client from './apollo/client';
 
 const customFilter = new Filter();
-customFilter.addWords('spam', 'hate', 'speech');  // Add more inappropriate words here
+customFilter.addWords('spam', 'hate', 'speech', ...profaneWords);  // Add more inappropriate words here
 
 const theme = createTheme({
   palette: {
@@ -38,49 +40,63 @@ const App = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
 
+  //Handle real-time updates for new and updated reviews
   useSubscription(SUBSCRIBE_TO_REVIEW_UPDATES, {
     onData: ({ subscriptionData }) => {
-      const updatedReview = subscriptionData.data.reviewUpdated;
-      if (updatedReview) {
+      if (subscriptionData?.data?.reviewUpdated) {
+        const {reviewUpdated} = subscriptionData.data;
         setReviews(prevReviews => {
-          const newReviews = [updatedReview, ...prevReviews.filter(review => review.reviewID !== updatedReview.reviewID)];
-          return newReviews.slice(0, 3);
-        });
+        const filteredReviews = prevReviews.filter(review => review.reviewID !== reviewUpdated.reviewID && review.status !== 'deleted');
+        return [reviewUpdated, ...filteredReviews].slice(0, 3);
+      }); 
       }
     }
   });
 
-  useSubscription(SUBSCRIBE_TO_REVIEW_DELETED, {
-    onData: ({ subscriptionData }) => {
+ //Handle real-time updates for deleted reviews
+ useSubscription(SUBSCRIBE_TO_REVIEW_DELETED, {
+  onData: ({ subscriptionData }) => {
+    if (subscriptionData?.data?.reviewDeleted) { 
       const deletedReviewID = subscriptionData.data.reviewDeleted.reviewID;
-      if (deletedReviewID) {
-        setReviews(prevReviews => prevReviews.filter(review => review.reviewID !== deletedReviewID).slice(0, 3));
-      }
-    }
-  });
+    setReviews(prevReviews => prevReviews.filter(review => review.reviewID !== deletedReviewID));
+    fetchLatestReviews();
+  }
+  }
+}); 
 
+//Function to fetch the latest reviews
+const fetchLatestReviews = async () => {
+  const { data } = await client.query({
+    query: GET_INITIAL_REVIEWS,
+    fetchPolicy: 'network-only'  //Ensures the query always fetches fresh data
+  });
+  if (data && data.reviews) {
+    setReviews(data.reviews.slice(0, 3));
+  }
+};
+
+  //Handle real-time updates for flagged reviews
   useSubscription(SUBSCRIBE_TO_REVIEW_FLAGGED, {
     onData: ({ subscriptionData }) => {
-      if (subscriptionData && subscriptionData.data && subscriptionData.data.reviewFlagged) {
-        const flaggedReview = subscriptionData.data.reviewFlagged;
+      if (subscriptionData?.data?.reviewFlagged) {
+        const { reviewFlagged } = subscriptionData.data;
         setReviews(prevReviews => prevReviews.map(review =>
-          review.reviewID === flaggedReview.reviewID ? { ...review, status: flaggedReview.status } : review
-        ));
+          review.reviewID === reviewFlagged.reviewID ? {
+            ...review,
+            reviewText: reviewFlagged.status === 'flagged' ? "[**** This review has been flagged due to inappropriate content ****]" : review.originalText,
+            originalText: review.originalText || review.reviewText,
+          } : review
+        ).slice(0, 3)); //Maintain only the latest three reviews
       } else {
         console.error('Flagged data is missing');
       }
     }
-  });  
-
+  });
+  
   const handleToggleUserStatus = async (userID, currentStatus) => {
     try {
-      await toggleUserStatus({
-        variables: { userID },
-        update: (cache, { data: { toggleUserStatus } }) => {
-          const existingUsers = cache.readQuery({
-            query: GET_USERS
-          });
-  
+      await toggleUserStatus({variables: { userID }, update: (cache, { data: { toggleUserStatus } }) => {
+          const existingUsers = cache.readQuery({query: GET_USERS});
           if (existingUsers && existingUsers.users) {
             const newUsers = existingUsers.users.map(user => {
               if (user.id === userID) {
@@ -89,10 +105,7 @@ const App = () => {
                 return user;
               }
             });
-  
-            cache.writeQuery({
-              query: GET_USERS,
-              data: { users: newUsers },
+            cache.writeQuery({query: GET_USERS,data: { users: newUsers },
             });
           }
         }
@@ -106,18 +119,17 @@ const App = () => {
 
   useEffect(() => {
     if (initialData && initialData.reviews) {
-      setReviews(initialData.reviews.map(review => ({
+      const filteredReviews = initialData.reviews.map(review => ({
         ...review,
-        isFlagged: customFilter.isProfane(review.reviewText)
-        })).slice(0, 3));
+        reviewText: customFilter.isProfane(review.reviewText) ? "[**** This review has been flagged due to inappropriate content ****]" : review.reviewText
+      })).filter(review => review.status !== 'deleted').slice(0, 3);
+      setReviews(filteredReviews);
     }
   }, [initialData]);
 
   const handleConfirmedDelete = async () => {
     try {
-      const response = await deleteReview({
-        variables: { reviewID: selectedReview }
-      });
+      const response = await deleteReview({variables: { reviewID: selectedReview }});
       if (response.data.deleteReview) {
         setReviews(prev => prev.filter(r => r.reviewID !== selectedReview));
         toast.error("Review deleted!");
@@ -131,9 +143,7 @@ const App = () => {
 
   const handleFlagReview = async (reviewID) => {
     try {
-      const response = await flagReview({
-        variables: { reviewID }
-      });
+      const response = await flagReview({variables: { reviewID }});
       if (response.data && response.data.flagReview) {
         setReviews(prev => prev.map(r => {
           return r.reviewID === reviewID ? { ...r, status: response.data.flagReview.status } : r;
@@ -170,15 +180,16 @@ const App = () => {
         <Typography variant="h4" sx={{ mb: 2 }}>Admin Dashboard</Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={groupedReviews}>
-                <XAxis dataKey="name" />
-                <YAxis allowDecimals={false} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="Reviews" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={groupedReviews} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="productID" label={{ value: "Product ID", position: 'insideBottom', offset: -5 }} />
+          <YAxis allowDecimals={false} label={{ value: 'Reviews Count', angle: -90, position: 'insideLeft' }} />
+          <Tooltip />
+         <Legend verticalAlign="top" wrapperStyle={{ lineHeight: '40px' }} />
+          <Bar dataKey="Reviews" fill="#8884d8" barSize={20} />
+          </BarChart>
+          </ResponsiveContainer> 
           </Grid>
           <Grid item xs={12} md={6}>
             <Card>
@@ -210,7 +221,7 @@ const App = () => {
                     Product {review.productID}
                   </Typography>
                   <Typography variant="h5" component="h2">
-                    {review.isFlagged ? '🚩 ' : ''}{review.reviewText}
+                  {review.reviewText}
                   </Typography>
                   <Typography color="textSecondary">
                     Stars: {review.numberOfStars}

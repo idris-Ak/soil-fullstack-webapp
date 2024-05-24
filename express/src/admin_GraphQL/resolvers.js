@@ -8,7 +8,9 @@ const resolvers = {
     reviews: async (_, __, { db }) => {
       try {
         const reviews = await db.review.findAll({
-          attributes: ['reviewID', 'productID', 'userID', 'numberOfStars', 'reviewText', 'dateCreated', 'status']
+          attributes: ['reviewID', 'productID', 'userID', 'numberOfStars', 'reviewText', 'dateCreated', 'status'],
+          order: [['dateCreated', 'DESC']], //Order the reviews by dateCreated in descending order
+          limit: 3  //Limit the number of reviews fetched to the latest three made on the SOIL website
         });
         return reviews;
       } catch (error) {
@@ -53,7 +55,14 @@ const resolvers = {
       throw new Error("Review not found.");
     }
     //Toggle review status between 'active' and 'flagged'
-    review.status = (review.status === 'active' ? 'flagged' : 'active');
+    if (review.status === 'active') {
+      review.status = 'flagged';
+      review.originalText = review.reviewText;  // Save the original text when flagged
+      review.reviewText = "[**** This review has been flagged due to inappropriate content ****]";
+    } else {
+      review.status = 'active';
+      review.reviewText = review.originalText; // Restore the original text when unflagged
+    }
     await review.save();
     pubsub.publish('REVIEW_FLAGGED', { reviewFlagged: review });
     return review;
