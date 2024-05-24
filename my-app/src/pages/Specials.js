@@ -34,8 +34,8 @@ function Specials({ addToCart, isLoggedIn}) {
                on <a href="https://unsplash.com/photos/man-in-green-dress-shirt-and-gray-pants-standing-on-green-plants-during-daytime-siD6uufCyt8?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>*/}
               <img src="farming_class_2.jpg" alt="Special 1" className="d-block w-100 rounded" style={{maxHeight:'800px', maxWidth: '1900px'}}/>
               <div className="carousel-caption d-none d-md-block">
-                <h1 style={{color:'white'}}>Farming Classes</h1>
-                <h6>50% off - Learn how to grow your own vegetables!</h6>
+                <h1 style={{color:'white'}}>organic Farming</h1>
+                <h6>All our prodcuts are sourced locally and environment friendly</h6>
               </div>
             </div>
             <div className="carousel-item">
@@ -43,8 +43,8 @@ function Specials({ addToCart, isLoggedIn}) {
               <a href="https://unsplash.com/photos/white-and-green-flowers-on-brown-wooden-table-mIghSJJfWOc?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>*/}
               <img src="nutrition_Counseling_2.jpg" alt="Special 2" className="d-block w-100 rounded" style={{maxHeight:'800px', maxWidth: '1900px'}}/>
               <div className="carousel-caption d-none d-md-block">
-                <h1 style={{color:'white'}}>Nutrition Counseling</h1>
-                <h6>Sign up today and receive your first week <b>FREE!</b></h6>
+                <h1 style={{color:'white'}}>Quality checks</h1>
+                <h6>All products are put through a Quality assurance program to ensure you have the best experience</h6>
               </div>
             </div>
             <div className="carousel-item">

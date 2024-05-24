@@ -21,8 +21,6 @@ const initCart = async (User) => {
     console.log("user is :", User)
 
   }
-  
-
   let id = User.id;
   console.log("initCart: user id of:",id)
   try {

@@ -58,7 +58,6 @@ function Cart({ cart, addToCart, removeFromCart }) {
               <div className="row main align-items-center">
                 <div className="col-2"><img className="img-fluid" src={item.img} alt={item.name} /></div> {/* Product image */}
                 <div className="col"> {/* Column for product details */}
-                  <div className="row text-muted">{item.title}</div> {/* Product name */}
                   <div className="row" style={{ fontSize: '0.75rem' }}>{item.description}</div> {/* Product description */}
                 </div>
                 <div className="col"> {/* Column for quantity control */}

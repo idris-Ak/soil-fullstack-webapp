@@ -1,11 +1,13 @@
 // Summary.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState ,useRef} from "react";
 import './Summary.css';
 import { Link } from "react-router-dom";
 
 
-function Summary({removeAllFromCart}) {
+function Summary({removeAllFromCart, cart}) {
   const [orderedItems, setOrderedItems] = useState([]);
+  const hasRunEffect = useRef(false); // Add this line
+
 
     //removing all cart items
     let checkoutDetails = JSON.parse(localStorage.getItem('checkoutDetails'));
@@ -17,21 +19,25 @@ function Summary({removeAllFromCart}) {
     localStorage.setItem("checkoutDetails", JSON.stringify(checkoutDetails));
 
     useEffect(() => {
-      const storedItems = JSON.parse(localStorage.getItem("cart"));
+      if (hasRunEffect.current) return; // If effect has run, return early
+      hasRunEffect.current = true; // Mark effect as having run
+  
+      const storedItems = cart;
       if (storedItems !== null && storedItems.length > 0) {
         setOrderedItems(storedItems);
       }
-      console.log("Effect to remove all from cart");
-      removeAllFromCart(); // eslint-disable-next-line
-    }, []);
-        
+  
+      console.log("Effect to remove all from cart", cart);
+      removeAllFromCart(); // Remove all items from cart
+      // eslint-disable-next-line
+    }, []); 
 
   return (
     <div className="summary-container">
       <h2 className="summary-header">Order Confirmation</h2>
       <div className="summary-ordered-items">
         {orderedItems.map(item => (
-          <div key={item.id} className="summary-item">
+          <div key={item.cartItemID} className="summary-item">
             <div className="summary-name">{item.name}   x{item.quantity}</div>
             <div className="summary-price">${item.price * item.quantity}</div>
           </div>

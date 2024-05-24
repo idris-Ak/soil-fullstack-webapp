@@ -102,9 +102,11 @@ const deleteCartItem = async (itemId) => {
 
 
 
-  const removeAllFromCart = () => {
+  const removeAllFromCart = async () => {
+    const deletePromises = cart.map(item => deleteCartItem(item.cartItemID));
+    await Promise.all(deletePromises);
     setCart([]);
-    console.log("removeAll From Cart executed");
+    console.log("removeAll From Cart executed", cart);
   };
 
 
