@@ -9,18 +9,31 @@ const typeDefs = require("./src/admin_GraphQL/types");
 const resolvers = require("./src/admin_GraphQL/resolvers");
 const http = require('http');
 
-// Database will be sync'ed in the background.
-db.sync();
+// Sync database
+db.sequelize.sync();
 
 const app = express();
 const httpServer = http.createServer(app);
+
+// Parse requests of content-type - application/json.
+app.use(express.json());
+
+// Add CORS suport.
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+
+require("./src/routes/user.routes.js")(express, app);
+require("./src/routes/product.routes.js")(express, app);
+require("./src/routes/shoppingCart.routes.js")(express, app);
+require("./src/routes/cartItem.routes.js")(express, app);
+require("./src/routes/review.routes.js")(express, app);
 
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 const subscriptionServer = SubscriptionServer.create({
   schema,
   execute,
-  subscribe
+  subscribe,
 }, {
   server: httpServer,
   path: '/graphql',
@@ -45,28 +58,13 @@ const server = new ApolloServer({
   await server.start();
   server.applyMiddleware({ app });
   const PORT = 4001;
-  httpServer.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}/graphql`));
+  httpServer.listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`));
 })();
 
-// Parse requests of content-type - application/json.
-app.use(express.json());
-
-// Add CORS suport.
-app.use(cors());
-app.use(express.urlencoded({ extended: true }));
-
-require("./src/routes/user.routes.js")(express, app);
-require("./src/routes/product.routes.js")(express, app);
-require("./src/routes/shoppingCart.routes.js")(express, app);
-require("./src/routes/cartItem.routes.js")(express, app);
-require("./src/routes/review.routes.js")(express, app);
-
 // Set port, listen for requests.
-db.sequelize.sync().then(() => {
-const PORT = 4000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
-});
+const REST_PORT = 4000;
+app.listen(REST_PORT, () => {
+  console.log(`Server is running on port ${REST_PORT}.`);
 });
 
 module.exports = app; // Export the app for testing

@@ -25,9 +25,23 @@ const splitLink = split(
   httpLink,
 );
 
+const cache = new InMemoryCache({
+  typePolicies: {
+    Query: {
+      fields: {
+        latestReviews: {
+          merge(existing = [], incoming) {
+            return incoming;
+          },
+        },
+      },
+    },
+  },
+});
+
 const client = new ApolloClient({
   link: splitLink,
-  cache: new InMemoryCache(),
+  cache: cache,
 });
 
 export default client;

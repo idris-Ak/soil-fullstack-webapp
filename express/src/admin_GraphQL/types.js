@@ -21,7 +21,7 @@ const typeDefs = gql`
 
   type Query {
     users: [User]
-    reviews: [Review]
+    latestReviews: [Review]
     flaggedReviews: [Review]
   }
 

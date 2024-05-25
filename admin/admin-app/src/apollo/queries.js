@@ -1,9 +1,9 @@
 import { gql } from '@apollo/client';
 
-//Query to get the initial reviews
-export const GET_INITIAL_REVIEWS = gql`
+//Query to get the latest reviews
+export const GET_LATEST_REVIEWS = gql`
 query {
-  reviews {
+  latestReviews {
     reviewID
     productID
     userID
@@ -31,18 +31,6 @@ query {
 export const SUBSCRIBE_TO_REVIEW_UPDATES = gql`
 subscription {
   reviewUpdated {
-    reviewID
-    productID
-    userID
-    reviewText
-    numberOfStars
-    dateCreated
-    status
-  }
-  reviewDeleted {
-    reviewID
-  }
-  reviewFlagged {
     reviewID
     productID
     userID

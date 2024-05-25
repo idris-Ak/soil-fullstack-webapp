@@ -5,10 +5,13 @@ const resolvers = {
   Query: {
     users: (_, __, { db }) => db.user.findAll(),
     //Get the current reviews from the database
-    reviews: async (_, __, { db }) => {
+    latestReviews: async (_, __, { db }) => {
       try {
         const reviews = await db.review.findAll({
           attributes: ['reviewID', 'productID', 'userID', 'numberOfStars', 'reviewText', 'dateCreated', 'status'],
+          where: {
+            status: ['active'], // Include only active and flagged reviews
+          },
           order: [['dateCreated', 'DESC']], //Order the reviews by dateCreated in descending order
           limit: 3  //Limit the number of reviews fetched to the latest three made on the SOIL website
         });
@@ -49,18 +52,19 @@ const resolvers = {
     },
     //Flag the review if content is deemed inappropriate
     flagReview: async (_, { reviewID }, { db }) => {
-    const review = await db.review.findByPk(reviewID);
-    if (!review) {
-      console.error("Review not found for ID: ", reviewID);
-      throw new Error("Review not found.");
+      const review = await db.review.findByPk(reviewID);
+      if (!review) {
+        console.error("Review not found for ID: ", reviewID);
+        throw new Error("Review not found.");
+      }
+    
+      //Set the status to flagged and update the review text to indicate it's flagged
+      review.status = 'flagged';
+      review.reviewText = "[**** This review has been flagged due to inappropriate content ****]";
+      await review.save();
+      pubsub.publish('REVIEW_FLAGGED', { reviewFlagged: review });
+      return review;
     }
-    //Toggle the status and update the reviewText accordingly
-    review.status = review.status === 'active' ? 'flagged' : 'active';
-    review.reviewText = review.status === 'flagged' ? "[**** This review has been flagged due to inappropriate content ****]" : review.originalText;
-    await review.save();
-    pubsub.publish('REVIEW_FLAGGED', { reviewFlagged: review });
-    return review;
-  }
 },
 
   //Create subscriptions to indicate if review is updated, flagged or deleted 

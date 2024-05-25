@@ -23,6 +23,24 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 6. To start the admin dashboard front end code, go to the 'admin-app' folder by running `cd admin` and then cd `admin-app` in your terminal.  
 7. Start the program by executing `npm start` in the terminal.
 
+## Admin Dashboard
+1. **Review Management**:
+    - The Admin can flag reviews if deemed inappropriate. These reviews will be updated with the message, `[**** This review has been flagged due to inappropriate content ****]`. Each review is displayed in a separate box
+    with the review text, number of stars and the date the review was created.
+
+2.  **Graphical Metrics**:
+    - Average Number of Stars For Each Product: A bar chart displaying the number of reviews for each product by there productID
+
+### Scenario Handled For When A Review is Considered Inappropriate
+1. The 'bad-words' and 'profane-words' libraries are used to automate the task of detecting inappropriate content in the reviews. If any of the profane words are detected, it automatically flags the review by displaying
+the text, `[**** This review has been flagged due to inappropriate content ****]`.
+2. If an admin deems a review as irrelevant, inappropriate or something else that isn't detected through the libraries such as hate speech or spam, they can delete the review manually and the review will then be replaced by the text,
+`[**** This review has been deleted by the admin ***]`.
+
+### Explanation of Metrics
+1. **Review Count Per Product**
+    - A bar chart to display the average number of stars per product was used to track the user engagement with varying products. This allows for indicators of popular products and to identify the products with the most user attraction. Products with the least user attraction can also be known which could account for specials on those products if needed based on the average ratings of the products. 
+
 ## References For Product Images
 *Organic Apples*
 Photo by <a href="https://unsplash.com/@_k8_?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">K8</a> on <a href="https://unsplash.com/photos/red-apples-on-brown-wooden-table-hRbt11o8cEU?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
