@@ -117,3 +117,17 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
+exports.getUser = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const user = await db.user.findOne({ 
+            where: {
+                id
+            },
+        });
+        res.json(user); // This will return an empty array if no items are found
+    } catch (error) {
+        console.error("Error retrieving user:", id);
+        res.status(500).send({ message: "Error getting user", error: error.message });
+    }
+};

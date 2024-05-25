@@ -21,13 +21,11 @@ import axios from 'axios';
 
 
 function App() {
-  const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem('currentUser')) || null);
+  const [currentUser, setCurrentUser] = useState();
   const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
   const [cart, setCart] = useState([]);
   const [cartID, setCartID] = useState(0);
-  const [isMounted, setIsMounted] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
-
 
 
 const addToCart = async (newItem, amount) => {
@@ -142,26 +140,31 @@ const deleteCartItem = async (itemId) => {
 
 
 
-  
-  useEffect(() => {
-    if (!isMounted) {
-      setIsMounted(true);
+  // function to keep user logged in even after reload of page
+  useEffect( () => {
+    const retrieveUser = async(userID) =>{
+      try {
+        const response = await axios.get(`http://localhost:4000/api/user/${userID}`);
+          setCurrentUser(response.data);
+      } catch (error) {
+        console.error('Error deleting cart item:', error);
+      }
     }
-  }, [isMounted]);
-  
-  //Update local storage whenever cart changes
-  useEffect(() => {
-    if (isMounted) {
-      // localStorage.setItem("cart", JSON.stringify(cart));
-      // updateCart(cart,user);
+    const userID = localStorage.getItem('currentUserID');
+
+    if (userID != null){
+      retrieveUser(userID);
     }
-  }, [cart, isMounted]);
+  },[])
+
 
   const loginUser = async (userDetails) => {
     try {
       const response = await axios.post('http://localhost:4000/api/user/Login', userDetails);
       if (response.status === 200 && response.data.user) {
-        localStorage.setItem('currentUser', JSON.stringify(response.data.user));
+        const user = response.data.user;
+        const userID = user.id;
+        localStorage.setItem('currentUserID', JSON.stringify(userID));
         localStorage.setItem('isLoggedIn', 'true');
         setCurrentUser(response.data.user);
         setIsLoggedIn(true);
@@ -184,7 +187,7 @@ const deleteCartItem = async (itemId) => {
 
   }
   const logoutUser = async () => {
-    localStorage.removeItem('currentUser');
+    localStorage.removeItem('currentUserID');
     localStorage.removeItem('isLoggedIn');
     setCurrentUser(null);
     setIsLoggedIn(false);
@@ -196,7 +199,8 @@ const deleteCartItem = async (itemId) => {
 
   //Update user details upon editing them in the profile page
   const updateCurrentUser = (user) => {
-    localStorage.setItem('currentUser', JSON.stringify(user));
+    const userID = user.id;
+    localStorage.setItem('currentUserID', JSON.stringify(userID));
     setCurrentUser(user);
   };
 

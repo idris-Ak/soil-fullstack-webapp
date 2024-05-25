@@ -7,6 +7,8 @@ module.exports = (express, app) => {
   router.post('/Login', controller.Login);
   router.patch('/:id', controller.updateUser);
   router.delete('/:id', controller.deleteUser);
+  router.get("/:id",controller.getUser);
+
   // Add routes to server.
   app.use("/api/user", router);
 };
