@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Button, Container, Grid, Card, CardContent, Typography, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, ThemeProvider, createTheme } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend, CartesianGrid } from 'recharts';
 import { useQuery, useSubscription, useMutation } from '@apollo/client';
-import { GET_INITIAL_REVIEWS, SUBSCRIBE_TO_REVIEW_UPDATES, SUBSCRIBE_TO_REVIEW_DELETED, SUBSCRIBE_TO_REVIEW_FLAGGED, MUTATION_TO_REVIEW_FLAGGED, MUTATION_TO_REVIEW_DELETED, MUTATION_TO_USER_STATUS, GET_USERS} from './apollo/queries';
+import { GET_INITIAL_REVIEWS, SUBSCRIBE_TO_REVIEW_UPDATES, MUTATION_TO_REVIEW_FLAGGED, MUTATION_TO_REVIEW_DELETED, MUTATION_TO_USER_STATUS, GET_USERS} from './apollo/queries';
 import { ToastContainer, toast } from 'react-toastify';
 import Filter from 'bad-words';
 import profaneWords from 'profane-words';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-import client from './apollo/client';
+// import client from './apollo/client';
 
-const customFilter = new Filter();
+const customFilter = new Filter({ emptyList: true });  //Reset the filter list
 customFilter.addWords('spam', 'hate', 'speech', ...profaneWords);  // Add more inappropriate words here
 
 const theme = createTheme({
@@ -39,59 +39,76 @@ const App = () => {
   const [reviews, setReviews] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState(null);
+  const [originalTexts, setOriginalTexts] = useState({});
 
   //Handle real-time updates for new and updated reviews
   useSubscription(SUBSCRIBE_TO_REVIEW_UPDATES, {
-    onData: ({ subscriptionData }) => {
-      if (subscriptionData?.data?.reviewUpdated) {
-        const {reviewUpdated} = subscriptionData.data;
-        setReviews(prevReviews => {
-        const filteredReviews = prevReviews.filter(review => review.reviewID !== reviewUpdated.reviewID && review.status !== 'deleted');
-        return [reviewUpdated, ...filteredReviews].slice(0, 3);
-      }); 
+    onSubscriptionData: ({ subscriptionData }) => {
+      const { reviewUpdated, reviewDeleted, reviewFlagged } = subscriptionData.data;
+      let updatedReviews = [...reviews];
+      if (reviewUpdated) {
+        updatedReviews = updatedReviews.map(r => r.reviewID === reviewUpdated.reviewID ? { ...r, ...reviewUpdated } : r);
       }
+      if (reviewDeleted) {
+        updatedReviews = updatedReviews.filter(r => r.reviewID !== reviewDeleted.reviewID);
+      }
+      if (reviewFlagged) {
+        updatedReviews = updatedReviews.map(r => {
+          if (r.reviewID === reviewFlagged.reviewID) {
+            const originalText = reviewFlagged.status === 'flagged' ? r.reviewText : originalTexts[reviewFlagged.reviewID];
+            setOriginalTexts(prev => ({ ...prev, [reviewFlagged.reviewID]: r.reviewText }));
+            return { ...r, reviewText: originalText, status: reviewFlagged.status };
+          }
+          return r;
+        });
+      }
+      setReviews(updatedReviews.filter(r => r.status !== 'deleted').slice(0, 3));
     }
   });
 
  //Handle real-time updates for deleted reviews
- useSubscription(SUBSCRIBE_TO_REVIEW_DELETED, {
-  onData: ({ subscriptionData }) => {
-    if (subscriptionData?.data?.reviewDeleted) { 
-      const deletedReviewID = subscriptionData.data.reviewDeleted.reviewID;
-    setReviews(prevReviews => prevReviews.filter(review => review.reviewID !== deletedReviewID));
-    fetchLatestReviews();
-  }
-  }
-}); 
+//  useSubscription(SUBSCRIBE_TO_REVIEW_DELETED, {
+//   onData: ({ subscriptionData }) => {
+//     if (subscriptionData?.data?.reviewDeleted) { 
+//       const deletedReviewID = subscriptionData.data.reviewDeleted.reviewID;
+//     setReviews(prevReviews => prevReviews.filter(review => review.reviewID !== deletedReviewID));
+//     fetchLatestReviews();
+//   }
+//   }
+// }); 
 
-//Function to fetch the latest reviews
-const fetchLatestReviews = async () => {
-  const { data } = await client.query({
-    query: GET_INITIAL_REVIEWS,
-    fetchPolicy: 'network-only'  //Ensures the query always fetches fresh data
-  });
-  if (data && data.reviews) {
-    setReviews(data.reviews.slice(0, 3));
-  }
-};
+// //Function to fetch the latest reviews
+// const fetchLatestReviews = async () => {
+//   const { data } = await client.query({
+//     query: GET_INITIAL_REVIEWS,
+//     fetchPolicy: 'network-only'  //Ensures the query always fetches fresh data
+//   });
+//   if (data && data.reviews) {
+//     setReviews(data.reviews.slice(0, 3));
+//   }
+// };
 
-  //Handle real-time updates for flagged reviews
-  useSubscription(SUBSCRIBE_TO_REVIEW_FLAGGED, {
-    onData: ({ subscriptionData }) => {
-      if (subscriptionData?.data?.reviewFlagged) {
-        const { reviewFlagged } = subscriptionData.data;
-        setReviews(prevReviews => prevReviews.map(review =>
-          review.reviewID === reviewFlagged.reviewID ? {
-            ...review,
-            reviewText: reviewFlagged.status === 'flagged' ? "[**** This review has been flagged due to inappropriate content ****]" : review.originalText,
-            originalText: review.originalText || review.reviewText,
-          } : review
-        ).slice(0, 3)); //Maintain only the latest three reviews
-      } else {
-        console.error('Flagged data is missing');
-      }
-    }
-  });
+//   //Handle real-time updates for flagged reviews
+//   useSubscription(SUBSCRIBE_TO_REVIEW_FLAGGED, {
+//     onData: ({ subscriptionData }) => {
+//       if (subscriptionData?.data?.reviewFlagged) {
+//         const { reviewFlagged } = subscriptionData.data;
+//         setReviews(prevReviews => prevReviews.map(review => {
+//           if (review.reviewID === reviewFlagged.reviewID) {
+//             if (reviewFlagged.status === 'flagged') {
+//               // Save the original text when flagging
+//               setOriginalTexts(prev => ({ ...prev, [reviewFlagged.reviewID]: review.reviewText }));
+//               return { ...review, reviewText: reviewFlagged.reviewText, status: 'flagged' };
+//             } else {
+//               // Restore the original text when unflagging
+//               return { ...review, reviewText: originalTexts[reviewFlagged.reviewID], status: 'active' };
+//             }
+//           }
+//           return review;
+//         }));
+//       }
+//     }
+//   });
   
   const handleToggleUserStatus = async (userID, currentStatus) => {
     try {
@@ -129,10 +146,11 @@ const fetchLatestReviews = async () => {
 
   const handleConfirmedDelete = async () => {
     try {
-      const response = await deleteReview({variables: { reviewID: selectedReview }});
+      const response = await deleteReview({ variables: { reviewID: selectedReview } });
       if (response.data.deleteReview) {
-        setReviews(prev => prev.filter(r => r.reviewID !== selectedReview));
-        toast.error("Review deleted!");
+        const remainingReviews = reviews.filter(r => r.reviewID !== selectedReview);
+        setReviews(remainingReviews);
+        toast.error("Review deleted successfully!");
         setModalOpen(false);
       }
     } catch (error) {
@@ -143,12 +161,10 @@ const fetchLatestReviews = async () => {
 
   const handleFlagReview = async (reviewID) => {
     try {
-      const response = await flagReview({variables: { reviewID }});
+      const response = await flagReview({ variables: { reviewID } });
       if (response.data && response.data.flagReview) {
-        setReviews(prev => prev.map(r => {
-          return r.reviewID === reviewID ? { ...r, status: response.data.flagReview.status } : r;
-        }));
-        toast.info(`Review ${response.data.flagReview.status === 'flagged' ? 'flagged' : 'unflagged'} successfully!`);
+        setReviews(reviews.map(r => r.reviewID === reviewID ? { ...r, status: response.data.flagReview.status } : r));
+        toast.success(`Review ${response.data.flagReview.status === 'flagged' ? 'flagged' : 'unflagged'} successfully!`);
       } else {
         throw new Error('Flagging failed due to missing data');
       }
@@ -157,7 +173,6 @@ const fetchLatestReviews = async () => {
       toast.error("Failed to flag review.");
     }
   };
-
 
   const groupedReviews = reviews.reduce((acc, review) => {
     const existingProduct = acc.find(r => r.productID === review.productID);
@@ -195,8 +210,8 @@ const fetchLatestReviews = async () => {
             <Card>
               <CardContent>
                 <Typography variant="h5" gutterBottom>Users</Typography>
-                {usersData && usersData.users.map(user => (
-                <Box key={user.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                {usersData && usersData.users.map((user, index, array) => (
+                <Box key={user.id} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, pb: 2, borderBottom: index !== array.length - 1 ? '1px solid #e0e0e0' : '' }}>
                 <Box>
                 <Typography variant="body1">{user.name}</Typography>
                 <Typography variant="body2" color="textSecondary">{user.email}</Typography>

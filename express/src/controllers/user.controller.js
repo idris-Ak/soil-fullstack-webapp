@@ -32,20 +32,29 @@ exports.SignUp = async(req, res) => {
 exports.Login = async(req, res) => {
     const {email, password} = req.body;
     try{
-        //Find the user details from the database
-        const user = await db.user.findOne({where: {email}});
-        //If the user doesn't exist, send an error message
-        if (!user) {
-            return res.status(401).send({ message: "Invalid Email/Password" });
-        }
-        //Compare inputted password and password in the database to give access to user
-        if(user && await bcrypt.compare(password, user.password)) {
-            res.send({ user: { id: user.id, name: user.name, email: user.email,  dateJoined: user.dateJoined.toISOString().split('T')[0] } }); 
-        }
-        else{
-            res.status(401).send({message: "Invalid Email/Password"});
-        }
-    }
+         //Find the user details from the database
+         const user = await db.user.findOne({ where: { email } });
+        
+         //If the user doesn't exist or password doesn't match, send an error message
+         if (!user || !(await bcrypt.compare(password, user.password))) {
+             return res.status(401).send({ message: "Invalid Email/Password" });
+         }
+ 
+         //If the user is blocked, send a blocked message
+         if (user.status === 'blocked') {
+             return res.status(403).send({ message: "Your account has been blocked. Please contact the admin." });
+         }
+ 
+         //If the user exists, password is correct, and the user is not blocked, send success response
+         res.send({
+             user: {
+                 id: user.id,
+                 name: user.name,
+                 email: user.email,
+                 dateJoined: user.dateJoined.toISOString().split('T')[0]
+             }
+         });
+     }
     catch(error){
         res.status(500).send({message: "Error logging in", error: error.message});
     }

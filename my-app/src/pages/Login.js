@@ -40,8 +40,8 @@ const handleSubmit = async (event) => {
       //Handle any errors that occur during login
       setErrorMessage(error.response?.data.message || 'Invalid email or password');
       setShowErrorMessage(true);
-      //Hide error alerts after 2.5 seconds
-      setTimeout(() => setShowErrorMessage(false), 2500);
+      //Hide error alerts after 4 seconds
+      setTimeout(() => setShowErrorMessage(false), 4000);
       //Reset the password field only after an unsuccessful login attempt
       setUserDetails(prevDetails => ({ ...prevDetails, password: '' }));
   }

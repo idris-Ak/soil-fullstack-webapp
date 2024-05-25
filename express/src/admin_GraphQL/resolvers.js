@@ -54,15 +54,9 @@ const resolvers = {
       console.error("Review not found for ID: ", reviewID);
       throw new Error("Review not found.");
     }
-    //Toggle review status between 'active' and 'flagged'
-    if (review.status === 'active') {
-      review.status = 'flagged';
-      review.originalText = review.reviewText;  // Save the original text when flagged
-      review.reviewText = "[**** This review has been flagged due to inappropriate content ****]";
-    } else {
-      review.status = 'active';
-      review.reviewText = review.originalText; // Restore the original text when unflagged
-    }
+    //Toggle the status and update the reviewText accordingly
+    review.status = review.status === 'active' ? 'flagged' : 'active';
+    review.reviewText = review.status === 'flagged' ? "[**** This review has been flagged due to inappropriate content ****]" : review.originalText;
     await review.save();
     pubsub.publish('REVIEW_FLAGGED', { reviewFlagged: review });
     return review;

@@ -40,7 +40,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                 if (response.data) {
                     console.log("Reviews loaded:", response.data);
                     //Set the reviews from the API data
-                    setReviews(response.data.reviews);
+                    setReviews(response.data.reviews || []);
                     //Set the pages based on the number of reviews
                     setTotalPages(response.data.totalPages);
                     //Calculate the average rating based on the existing reviews of a product
@@ -202,7 +202,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             <div>
                 {isFollowing ? (
                     <Dropdown>
-                        <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic" size="sm"> Following</Dropdown.Toggle>
+                        <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic" size="sm">Following</Dropdown.Toggle>
                         <Dropdown.Menu>
                             <Dropdown.Item style={{fontSize: '14px'}} onClick={toggleFollow}>Unfollow</Dropdown.Item>
                         </Dropdown.Menu>
@@ -325,6 +325,8 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                     {renderSortOptions()}
                     {reviews.length > 0 ? reviews.map((review, index) => (
                         <div key={`${review.reviewID}-${index}`}  className="review-item" style={{ fontFamily: 'Roboto, sans-serif', borderBottom: '1px solid #e0e0e0'}}>
+                        {review.status === 'active' ? (
+                            <>
                             <div style={{marginTop: '10px'}} className="rating">
                                 {/* OpenAI (2024) ChatGPT [Large language model], accessed 13 May 2024. (*Link could not be generated successfully*) */}
                                 {[...Array(review.numberOfStars)].map((_, i) => (
@@ -341,21 +343,26 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                                 <span style={{ float: 'right', fontSize: '0.8em', color: 'gray' }}>{new Date(review.dateCreated).toLocaleDateString()}</span>
                                 <br />
                                 <div style={{marginTop: '8px', marginBottom: '8px'}}>
-                                <i>{review.reviewText}</i>
+                                <p>{review.reviewText}</p>
                             </div>
                             <br />
                             {currentUser && currentUser.id === review.userID && (
                                 <div style={{marginBottom: '10px'}} className="d-flex justify-content-between">
                                     <Button style={{fontFamily: 'Lato, sans-serif'}} variant="info" size="sm" onClick={(event) => handleEdit(event, review)}>Edit</Button>
                                     <Button style={{fontFamily: 'Lato, sans-serif'}} variant="danger" size="sm" onClick={() => handleDeleteClick(review.reviewID)}>Delete</Button>
-                                </div>
-                        )}
-                        </div>
-                        )) : (
-                    <p style={{fontFamily: 'Roboto, sans-serif', fontWeight: 'bold', fontSize: '18px', alignContent: 'center'}}>No reviews yet. Be the first to write one!</p>
-                )}
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                    <div style={{ textAlign: 'center', marginTop: '8px', marginBottom: '8px' }}>
+                    <p>{review.reviewText}</p>
+                    </div>
+                    )}
+                    </div>
+                    )) : (
+                    <p style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 'bold', fontSize: '18px', textAlign: 'center' }}>No reviews yet. Be the first to write one!</p>
+                    )}
                        {renderPagination()}
-                       
                     {isLoggedIn && (
                     <Form onSubmit={handleReviewSubmit} className="mt-3">
                         <Form.Group className="mb-2">
