@@ -8,11 +8,16 @@ import { GET_LATEST_REVIEWS, SUBSCRIBE_TO_REVIEW_UPDATES, SUBSCRIBE_TO_REVIEW_DE
 import { ToastContainer, toast } from 'react-toastify';
 import Filter from 'bad-words';
 import profaneWords from 'profane-words';
+import { Filter as ProfanityCheck } from 'profanity-check';
+import Sentiment from 'sentiment';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 const filter = new Filter({ emptyList: true });  //Reset the filter list
-filter.addWords(...profaneWords, 'spam', 'hate', 'speech');
+filter.addWords(...profaneWords);
+
+const sentiment = new Sentiment();
+const profanityCheck = new ProfanityCheck();
 
 const theme = createTheme({
   palette: {
@@ -31,7 +36,14 @@ const theme = createTheme({
   },
 });
 
-const App = () => {
+//Check to see if the review text is inappropriate 
+const isInappropriate = (text) => {
+  const isProfane = filter.isProfane(text) || profanityCheck(text);
+  const sentimentScore = sentiment.analyze(text).score;
+  return isProfane || sentimentScore < -2;
+};
+
+function App() {
   const { data, loading } = useQuery(GET_LATEST_REVIEWS, {
     pollInterval: 5000, // Poll every 5 seconds
   });
@@ -51,8 +63,8 @@ const App = () => {
     if (!loading && data) {
       const filteredReviews = data.latestReviews.filter(review => review.status !== 'deleted' && review.status !== 'flagged').map(review => ({
         ...review,
-        reviewText: filter.isProfane(review.reviewText) ? "[**** This review has been flagged due to inappropriate content ****]" : review.reviewText,
-        status: filter.isProfane(review.reviewText) ? "flagged" : review.status
+        reviewText: isInappropriate(review.reviewText) ? "[**** This review has been flagged due to inappropriate content ****]" : review.reviewText,
+        status: isInappropriate(review.reviewText) ? "flagged" : review.status
       }));
       setReviews(filteredReviews);
     }
@@ -64,8 +76,8 @@ const App = () => {
       if (newReview.status !== 'deleted' && newReview.status !== 'flagged') {
         const updatedReview = {
           ...newReview,
-          reviewText: filter.isProfane(newReview.reviewText) ? "[**** This review has been flagged due to inappropriate content ****]" : newReview.reviewText,
-          status: filter.isProfane(newReview.reviewText) ? "flagged" : newReview.status
+          reviewText: isInappropriate(newReview.reviewText) ? "[**** This review has been flagged due to inappropriate content ****]" : newReview.reviewText,
+          status: isInappropriate(newReview.reviewText) ? "flagged" : newReview.status
         };
         setReviews(prev => [updatedReview, ...prev.filter(r => r.reviewID !== newReview.reviewID)].slice(0, 3));
       } else {

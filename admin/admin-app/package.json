@@ -17,6 +17,7 @@
     "date-fns": "^3.6.0",
     "graphql": "^16.8.1",
     "profane-words": "^1.5.11",
+    "profanity-check": "^0.0.3",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.2",
     "react-chartjs-2": "^5.2.0",
@@ -24,6 +25,7 @@
     "react-scripts": "^5.0.1",
     "react-toastify": "^10.0.5",
     "recharts": "^2.12.7",
+    "sentiment": "^5.0.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
