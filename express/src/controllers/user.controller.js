@@ -79,15 +79,14 @@ exports.updateUser = async (req, res) => {
             user.password = hashedPassword;
         }
 
-        //Update name if provided
+        //Update the name if a new name is provided
         if (name) {
             user.name = name;
         }
 
         await user.save();
 
-
-        //Find current user details in the database
+        //Find the current user details in the database
         const updatedUser = await db.user.findOne({
             where: { id },
             attributes: ['id', 'name', 'email', 'dateJoined']
@@ -127,6 +126,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 exports.getUser = async (req, res) => {
+    //Get a certain user from the database by id
     const { id } = req.params;
     try {
         const user = await db.user.findOne({ 
@@ -134,7 +134,7 @@ exports.getUser = async (req, res) => {
                 id
             },
         });
-        res.json(user); // This will return an empty array if no items are found
+        res.json(user); //This will return an empty array if no items are found
     } catch (error) {
         console.error("Error retrieving user:", id);
         res.status(500).send({ message: "Error getting user", error: error.message });

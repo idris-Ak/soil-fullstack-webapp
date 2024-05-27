@@ -10,10 +10,28 @@ const resolvers = {
         const reviews = await db.review.findAll({
           attributes: ['reviewID', 'productID', 'userID', 'numberOfStars', 'reviewText', 'dateCreated', 'status'],
           where: {
-            status: ['active'], // Include only active and flagged reviews
+            status: ['active'],
           },
-          order: [['dateCreated', 'DESC']], //Order the reviews by dateCreated in descending order
+          //Order the reviews by dateCreated in descending order
+          order: [['dateCreated', 'DESC']], 
           limit: 3  //Limit the number of reviews fetched to the latest three made on the SOIL website
+        });
+        return reviews;
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+        throw new Error("Failed to fetch reviews");
+      }
+    },
+    //Get all active reviews for calculating average ratings
+    allActiveReviews: async (_, __, { db }) => {
+      try {
+        const reviews = await db.review.findAll({
+          attributes: ['reviewID', 'productID', 'userID', 'numberOfStars', 'reviewText', 'dateCreated', 'status'],
+          where: {
+            status: 'active', 
+          },
+          //Order the reviews by dateCreated in descending order
+          order: [['dateCreated', 'DESC']], 
         });
         return reviews;
       } catch (error) {

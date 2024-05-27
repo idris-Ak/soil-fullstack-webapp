@@ -38,14 +38,12 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             });
             //Set the reviews
                 if (response.data) {
-                    console.log("Reviews loaded:", response.data);
                     //Set the reviews from the API data
-                    setReviews(response.data.reviews || []);
+                    setReviews(response.data.reviews);
                     //Set the pages based on the number of reviews
                     setTotalPages(response.data.totalPages);
-                    //Calculate the average rating based on the existing reviews of a product
-                    const totalStars = response.data.reviews.reduce((acc, review) => acc + review.numberOfStars, 0);
-                    setAverageRating(totalStars / response.data.reviews.length || 0);
+                    //Set the average rating
+                    setAverageRating(response.data.averageRating);
                 }else {
                 setShowErrorMessage(true);
                 setTimeout(() => {
@@ -85,17 +83,12 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                 //Set reviews based on if the attributes of the review and the following state were updated
                 const updatedReviews = edit ? reviews.map(r => r.reviewID === response.data.reviewID ? { ...r, ...response.data } : r) : [...reviews, response.data];
                 setReviews(updatedReviews); 
-                //Determine if new page is needed
-                // const newTotalPages = Math.ceil(updatedReviews.length / reviewsPerPage);
-                // if (newTotalPages > totalPages) {
-                //      //Move to the new last page
-                //     setCurrentPage(newTotalPages); 
-                // }
                 setNewReview('');
                 setRating(0);
                 setEdit(false);
                 setEditReviewID(null);
-                setCurrentPage(Math.ceil(updatedReviews.length / reviewsPerPage));
+                setCurrentPage(1); //Set to the first page
+                await loadReviews(sortOrder); //Re-fetch the reviews to update
             } catch(error){
                 //Send error messages
                 setShowErrorMessage(true);
@@ -106,10 +99,10 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             }
         }
         else{
-            //Alert the user if the review exceeds 100 words
+            //Alert the user if the review exceeds 100 characters
             setShowErrorMessage(true);
             setTimeout(() => {
-            setErrorMessage('Review must be between 1 and 100 words.');
+            setErrorMessage('Review must be between 1 and 100 characters.');
             setShowErrorMessage(false);
             }, 2500);
             
@@ -126,11 +119,13 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     };
 
     const handleDeleteClick = (reviewID) => {
+        //Handle the deletion of reviews
         setDeleteReviewID(reviewID);
         setShowDeleteConfirm(true);
     };
 
     const confirmDelete = async () => {
+        //Handle the confirmation to delete the review
         setShowDeleteConfirm(false);
         await handleDeleteReview(deleteReviewID);
         resetReviewForm();
@@ -149,7 +144,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             if (updatedResponse.data) {
                 setReviews(updatedResponse.data.reviews);
                 setTotalPages(updatedResponse.data.totalPages);
-                setCurrentPage(1); //Reset to first page or maintain current if applicable
+                setCurrentPage(1); //Reset to first page
             }
         }
         } catch (error) {
@@ -164,6 +159,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     };
 
     const resetReviewForm = () => {
+        //Reset the form 
         setNewReview('');
         setRating(0);
         setEdit(false);
@@ -171,6 +167,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     };
 
     const updateReviews = (userID, newFollowStatus) => {
+        //Update the reviews state after a follow occurs
         setReviews(prevReviews => prevReviews.map(review => {
             if (review.user.id === userID) {
                 return { ...review, isFollowing: newFollowStatus };
@@ -180,18 +177,22 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     };
 
     const FollowButton = ({ review, currentUser, updateReviews }) => {
+        //Set a state for user followings
         const [isFollowing, setIsFollowing] = useState(review.isFollowing);
-      
+        
         const toggleFollow = async () => {
+          //Handle users either following or unfollowing other users 
           const method = isFollowing ? 'delete' : 'post';
           const endpoint = `http://localhost:4000/api/review/follow/${review.userID}`;
           try {
             await axios({
               method: method,
               url: endpoint,
+              //FollowerID is the current user's id while followingID is the user that made the review's id
               data: { followerID: currentUser.id, followingID: review.userID }
             });
             setIsFollowing(!isFollowing);
+            //Call updateReviews function to update the review after a following or unfollowing is made
             updateReviews(review.userID, !isFollowing);
           } catch (error) {
             console.error('Error toggling follow status', error);
@@ -199,6 +200,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         };
       
         return (
+            //Style the follow buttons
             <div>
                 {isFollowing ? (
                     <Dropdown>
@@ -222,9 +224,10 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
             addToCart(item, quantity); // Add the item to the cart with selected quantity
             setShowNotification(true); // Show the notification
             setProductDetails(false); // Close the modal
-            setTimeout(() => setShowNotification(false), 2000); // Hide after 2 seconds
+            setTimeout(() => setShowNotification(false), 4000); // Hide after 4 seconds
             }
         else{
+            // Alert the user to login if not already logged in
             alert('Please log in to add to cart.');
             navigate('/Login');        
         }
@@ -236,7 +239,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     };
 
     const renderSortOptions = () => (
-        //Styling for the sorting options of the reviews
+        //Style the sorting options of the reviews
         <DropdownButton title={`Sort by: ${sortOrder}`} id="sort-dropdown" onSelect={handleSortChange} className="mb-3" variant="outline-primary">
             <Dropdown.Item eventKey="Latest">Latest</Dropdown.Item>
             <Dropdown.Item eventKey="Highest">Highest Rating</Dropdown.Item>
@@ -262,7 +265,8 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         for (let number = startPage; number <= endPage; number++) {
             items.push(<Pagination.Item key={number} active={number === currentPage} onClick={() => paginate(number)}>{number}</Pagination.Item>);
         }
-
+        
+        //Implement the next and last page functionalities 
         if (currentPage < totalPages) {
             items.push(<Pagination.Next key="next" onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} />);
             items.push(<Pagination.Last key="last" onClick={() => paginate(totalPages)} disabled={currentPage === totalPages} />);
@@ -270,6 +274,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     }
 
         return (
+            //Style the pagination
             <div style={{marginTop:'20px', textAlign: 'center'}}>
             <div style={{ margin: '0 20px', fontFamily: 'Open Sans, sans-serif' }}>Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong></div>
                 <Pagination className="ml-3 mr-3" style={{ display: 'inline-flex', marginTop: '10px' }}>{items}</Pagination>
@@ -345,7 +350,6 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                                 <div style={{marginTop: '8px', marginBottom: '8px'}}>
                                 <p>{review.reviewText}</p>
                             </div>
-                            <br />
                             {currentUser && currentUser.id === review.userID && (
                                 <div style={{marginBottom: '10px'}} className="d-flex justify-content-between">
                                     <Button style={{fontFamily: 'Lato, sans-serif'}} variant="info" size="sm" onClick={(event) => handleEdit(event, review)}>Edit</Button>
@@ -354,13 +358,13 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                                 )}
                             </>
                         ) : (
-                    <div style={{ textAlign: 'center', marginTop: '8px', marginBottom: '8px' }}>
-                    <p>{review.reviewText}</p>
-                    </div>
+                        <div style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
+                            <p>{review.reviewText}</p>
+                        </div>
                     )}
                     </div>
                     )) : (
-                    <p style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 'bold', fontSize: '18px', textAlign: 'center' }}>No reviews yet. Be the first to write one!</p>
+                    <p style={{ fontFamily: 'Roboto, sans-serif', fontWeight: 'bold', fontSize: '18px', textAlign: 'center' }}>No reviews yet.</p>
                     )}
                        {renderPagination()}
                     {isLoggedIn && (

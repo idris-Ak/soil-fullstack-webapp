@@ -29,16 +29,22 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
     with the review text, number of stars and the date the review was created.
 
 2.  **Graphical Metrics**:
-    - Average Number of Stars For Each Product: A bar chart displaying the number of reviews for each product by there productID
+    - **Average Number of Stars For Each Product**: A bar chart that displays the average number of stars for each product based on active reviews. This metric is useful for understanding user engagement and satisfaction with different products.
 
-### Scenario Handled For When A Review is Considered Inappropriate
-1. The 'bad-words' and 'profane-words' libraries are used to automate the task of detecting inappropriate content in the reviews. If any of the profane words are detected, it automatically flags the review by displaying
-the text, `[**** This review has been flagged due to inappropriate content ****]`.
-2. If an admin deems a review as irrelevant, inappropriate or something else that isn't detected through the libraries such as hate speech or spam, they can delete the review manually and the review will then be replaced by the text,
-`[**** This review has been deleted by the admin ***]`.
+### Scenarios Handled
+1. **Profanity and Offensive Language**:
+    - The 'bad-words' and 'profane-words' libraries are used to detect and flag reviews containing offensive language.
+2. **Negative Sentiment**:
+    - The 'sentiment' library is used to analyze the sentiment of review text. Reviews with a sentiment score below -2 are flagged as potentially inappropriate.
+
+### Strategies for Handling Inappropriate Content
+1. **Automated Flagging**:
+    - Reviews containing profane words or negative sentiment are automatically flagged with a message indicating the review has been flagged by the admin due to inappropriate content.
+2. **Manual Review and Deletion**:
+    - The admin can manually flag or delete reviews that are deemed inappropriate, irrelevant, or offensive. This allows for handling scenarios that the automated detection might miss, such as hate speech, spam, abusive language and threats to other users.
 
 ### Explanation of Metrics
-1. **Review Count Per Product**
+1. **Average Ratings by Product**
     - A bar chart to display the average number of stars per product was used to track the user engagement with varying products. This allows for indicators of popular products and to identify the products with the most user attraction. Products with the least user attraction can also be known which could account for specials on those products if needed based on the average ratings of the products. 
 
 ## References For Product Images

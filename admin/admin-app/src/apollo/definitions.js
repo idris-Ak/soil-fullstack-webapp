@@ -15,6 +15,21 @@ query {
   }
 `;
 
+//Query to get all of the active reviews
+export const GET_ALL_ACTIVE_REVIEWS = gql`
+  query {
+    allActiveReviews {
+      reviewID
+      productID
+      userID
+      reviewText
+      numberOfStars
+      dateCreated
+      status
+    }
+  }
+`;
+
 //Query to get the users
 export const GET_USERS = gql `
 query {

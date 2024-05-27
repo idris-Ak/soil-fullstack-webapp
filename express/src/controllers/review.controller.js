@@ -3,8 +3,8 @@ const db = require('../database');
 exports.postReview = async(req, res) => {
     try{
         const{productID, userID, reviewText, numberOfStars, dateCreated} = req.body;
-        //Validation check to ensure all attributes are not null
-        if (!productID || !userID || !reviewText || !numberOfStars) {
+        //Validation check to ensure id's are not null
+        if (!productID || !userID) {
             return res.status(400).send({ message: "Missing required fields" });
         }
         //Create a new review
@@ -19,7 +19,8 @@ exports.postReview = async(req, res) => {
           const user = await db.user.findByPk(userID);
           if (!user) {
               return res.status(404).send({ message: "User not found." });
-          }        
+          }
+        //Send the attributes          
         res.send({
             reviewID: review.reviewID,
             productID: review.productID,
@@ -65,7 +66,7 @@ exports.editReview = async(req, res) => {
             numberOfStars: review.numberOfStars,
             user: {
                 id: user.id,
-                name: user.name  // Ensure name is sent back
+                name: user.name  //Ensure name is sent back
             }
         });
         } catch(error){
@@ -160,6 +161,16 @@ exports.getReviews = async (req, res) => {
         const totalReviews = await db.review.count({
             where: { productID }
         });
+        
+        //Get the active reviews for sorting and average rating calculation
+        const activeReviews = await db.review.findAll({
+            where: { productID, status: 'active' },
+            attributes: ['numberOfStars']
+        });
+
+        //Calculate the average rating based on the active reviews
+        const totalStars = activeReviews.reduce((acc, review) => acc + review.numberOfStars, 0);
+        const averageRating = activeReviews.length > 0 ? totalStars / activeReviews.length : 0
 
         //Get all the existing reviews
         const reviews = await db.review.findAll({
@@ -168,7 +179,7 @@ exports.getReviews = async (req, res) => {
             offset: offset,
             include: [
                 {   
-                    //get the users from the database and include the followers
+                    //Get the users from the database and include the followers
                     model: db.user,
                     attributes: ['name', 'id'],
                     as: 'user',
@@ -181,7 +192,7 @@ exports.getReviews = async (req, res) => {
                     }]
                 }],
                 order: order
-        });
+            });
         
         //Map the reviews and follows
         const reviewsWithFollows = reviews.map(review => ({
@@ -193,7 +204,8 @@ exports.getReviews = async (req, res) => {
             reviews: reviewsWithFollows,
             page: page,
             totalPages: Math.ceil(totalReviews / limit),
-            totalReviews: totalReviews
+            totalReviews: totalReviews,
+            averageRating: averageRating
         });
 
     } catch (error) {
