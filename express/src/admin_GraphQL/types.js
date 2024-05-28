@@ -30,6 +30,7 @@ const typeDefs = gql`
     toggleUserStatus(userID: ID!): User
     deleteReview(reviewID: ID!): Review
     flagReview(reviewID: ID!): Review
+    updateReview(reviewID: ID!, reviewText: String!, numberOfStars: Int!): Review
   }
 
   type Subscription {
