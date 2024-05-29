@@ -67,4 +67,4 @@ app.listen(REST_PORT, () => {
   console.log(`Server is running on port ${REST_PORT}.`);
 });
 
-module.exports = app; // Export the app for testing
+module.exports = { app, ApolloServer: server }; //Export the app and ApolloServer for testing

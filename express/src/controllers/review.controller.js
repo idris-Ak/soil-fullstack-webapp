@@ -3,9 +3,14 @@ const db = require('../database');
 exports.postReview = async(req, res) => {
     try{
         const{productID, userID, reviewText, numberOfStars, dateCreated} = req.body;
-        //Validation check to ensure id's are not null
-        if (!productID || !userID) {
+        //Validation check to ensure attributes are not null for the reviews unit test
+        if (!productID || !userID || !reviewText || !numberOfStars) {
             return res.status(400).send({ message: "Missing required fields" });
+        }
+
+        //Validation check for review text length for the reviews unit test
+        if (reviewText.length > 100) {
+            return res.status(400).send({ message: 'Review text cannot exceed 100 characters' });
         }
         //Create a new review
         const review = await db.review.create({

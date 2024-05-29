@@ -18,14 +18,15 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
     - `https://nodejs.org/en/download`
 2. Install necessary dependencies by running `npm install` in the 'my-app' folder, 'express' folder and 'admin-app' folder in your terminal if the dependencies aren't already installed. 
 3. Navigate to the express folder by running `cd express` in your terminal.
-4. Start the server by executing `node server.js` in your terminal.
-5. On a separate terminal, navigate to the front end code by running `cd my-app` in your terminal.
-6. To start the admin dashboard front end code, go to the 'admin-app' folder by running `cd admin` and then cd `admin-app` in your terminal.  
-7. Start the program by executing `npm start` in the terminal.
+4. Start the servers for both the SOIL website and the admin dashboard by executing `node server.js` in your terminal.
+5. On a separate terminal, navigate to the SOIL frontend code by running `cd my-app` in your terminal.
+6. Start the SOIL frontend code by executing `npm start` in your terminal.
+7. To start the admin dashboard frontend code, go to the 'admin-app' folder by running `cd admin` and then cd `admin-app` in a new terminal.  
+8. Start the admin dashboard frontend code by executing `npm start` in your terminal.
 
 ## Admin Dashboard
 1. **Review Management**:
-    - The Admin can flag reviews if deemed inappropriate. These reviews will be updated with the message, `[**** This review has been flagged due to inappropriate content ****]`. Each review is displayed in a separate box
+    - The Admin can flag reviews if deemed inappropriate. These reviews will be updated with the message, `[**** This review has been flagged by the admin due to inappropriate content ****]`. The latest three reviews are displayed in a separate box
     with the review text, number of stars and the date the review was created.
 
 2.  **Graphical Metrics**:
@@ -33,18 +34,18 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 
 ### Scenarios Handled
 1. **Profanity and Offensive Language**:
-    - The 'bad-words' and 'profane-words' libraries are used to detect and flag reviews containing offensive language.
+    - The 'bad-words', 'profane-words' and 'profanity-check' libraries are used to detect and flag reviews containing offensive language. Multiple libraries that detect offensive content are used to ensure every profane word is accurately detected and dealt with accordingly.
 2. **Negative Sentiment**:
     - The 'sentiment' library is used to analyze the sentiment of review text. Reviews with a sentiment score below -2 are flagged as potentially inappropriate.
 
 ### Strategies for Handling Inappropriate Content
 1. **Automated Flagging**:
-    - Reviews containing profane words or negative sentiment are automatically flagged with a message indicating the review has been flagged by the admin due to inappropriate content.
-2. **Manual Review and Deletion**:
+    - Reviews containing profane words or negative sentiment are automatically flagged with a message indicating the review has been flagged by the admin due to inappropriate content but these are not displayed on the admin dashboard as the review is already flagged.
+2. **Manual Review Deletion And Flagging**:
     - The admin can manually flag or delete reviews that are deemed inappropriate, irrelevant, or offensive. This allows for handling scenarios that the automated detection might miss, such as hate speech, spam, abusive language and threats to other users.
 
 ### Explanation of Metrics
-1. **Average Ratings by Product**
+1. **Average Ratings By Product**
     - A bar chart to display the average number of stars per product was used to track the user engagement with varying products. This allows for indicators of popular products and to identify the products with the most user attraction. Products with the least user attraction can also be known which could account for specials on those products if needed based on the average ratings of the products. 
 
 ## References For Product Images

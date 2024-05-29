@@ -45,6 +45,7 @@ const typeDefs = gql`
     createProduct(name: String!, description: String, title:String, type: String!, price: Float!, isSpecial: Boolean, img: String): Product
     updateProduct(productID: ID!, name: String, description: String, type: String, price: Float, isSpecial: Boolean, img: String): Product
     deleteProduct(productID: ID!): Product
+    updateReview(reviewID: ID!, reviewText: String!, numberOfStars: Int!): Review
   }
 
   type Subscription {

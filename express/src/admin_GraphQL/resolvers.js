@@ -88,7 +88,7 @@ const resolvers = {
         throw new Error("Review not found.");
       }
         review.status = 'deleted';
-        review.reviewText = "[**** This review has been deleted by the admin ***]";
+        review.reviewText = "[**** This review has been deleted by the admin ****]";
         await review.save();
         pubsub.publish('REVIEW_DELETED', { reviewDeleted: review });
         return review;
@@ -103,7 +103,7 @@ const resolvers = {
     
       //Set the status to flagged and update the review text to indicate it's flagged
       review.status = 'flagged';
-      review.reviewText = "[**** This review has been flagged due to inappropriate content ****]";
+      review.reviewText = "[**** This review has been flagged by the admin due to inappropriate content ****]";
       await review.save();
       pubsub.publish('REVIEW_FLAGGED', { reviewFlagged: review });
       return review;
@@ -151,6 +151,19 @@ const resolvers = {
       }
     }
   },
+  updateReview: async (_, { reviewID, reviewText, numberOfStars }, { db }) => {
+    const review = await db.review.findByPk(reviewID);
+    if (!review) {
+      console.error("Review not found for ID: ", reviewID);
+      throw new Error("Review not found.");
+    }
+    review.reviewText = reviewText;
+    review.numberOfStars = numberOfStars;
+    await review.save();
+    pubsub.publish('REVIEW_UPDATED', { reviewUpdated: review });
+    return review;
+  },
+
   //Create subscriptions to indicate if review is updated, flagged or deleted 
   Subscription: {
     reviewUpdated: {
