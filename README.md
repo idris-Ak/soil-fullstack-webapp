@@ -7,7 +7,7 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 - When users are prompted to login for the cart and diet planner, they will be redirected to the profile page instead of the cart/diet planner page after successfully logging in, as per the specifications.
 - Images and icons are stored in the public folder.
 - More product information and the reviews can be displayed by clicking on the product image or name.
-- The reviews have a maximum character limit of 100 characters as per the specifications and the ranking of each star can be seen by hovering over each star.
+- The reviews have a maximum character limit of 100 characters as per the specifications and the ranking of each star can be seen by hovering over each star. The reviews unit test specifically tests the backend.
 
 ## ER Diagram
 - 'NN' stands for 'Not Null' 
@@ -17,12 +17,13 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 1. Ensure Node.js is installed so that you can install the project dependencies if required. Use this link to install Node.js if not already installed:
     - `https://nodejs.org/en/download`
 2. Install necessary dependencies by running `npm install` in the 'my-app' folder, 'express' folder and 'admin-app' folder in your terminal if the dependencies aren't already installed. 
-3. Navigate to the express folder by running `cd express` in your terminal.
+3. Navigate to the 'express' folder by running `cd express` in your terminal.
 4. Start the servers for both the SOIL website and the admin dashboard by executing `node server.js` in your terminal.
 5. On a separate terminal, navigate to the SOIL frontend code by running `cd my-app` in your terminal.
 6. Start the SOIL frontend code by executing `npm start` in your terminal.
 7. To start the admin dashboard frontend code, go to the 'admin-app' folder by running `cd admin` and then cd `admin-app` in a new terminal.  
 8. Start the admin dashboard frontend code by executing `npm start` in your terminal.
+9. To run the unit tests, navigate to the 'express' folder and run `npm test` in your terminal. 
 
 ## Admin Dashboard
 1. **Review Management**:
