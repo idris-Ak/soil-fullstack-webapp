@@ -130,11 +130,17 @@ exports.getUser = async (req, res) => {
     const { id } = req.params;
     try {
         const user = await db.user.findOne({ 
-            where: {
-                id
-            },
+            where: {id},
+            attributes: ['id', 'name', 'email', 'dateJoined']
         });
-        res.json(user); //This will return an empty array if no items are found
+
+        if (user) {
+            // Make sure the dateJoined is still in yyyy-mm-dd format
+            user.dataValues.dateJoined = user.dateJoined.toISOString().split('T')[0];
+            res.json(user);
+        } else {
+            res.status(404).send({ message: "User not found." });
+        }
     } catch (error) {
         console.error("Error retrieving user:", id);
         res.status(500).send({ message: "Error getting user", error: error.message });
