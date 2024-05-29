@@ -149,19 +149,19 @@ const resolvers = {
         console.error("Error deleting product:", error);
         throw new Error("Failed to delete product");
       }
+    },
+    updateReview: async (_, { reviewID, reviewText, numberOfStars }, { db }) => {
+      const review = await db.review.findByPk(reviewID);
+      if (!review) {
+        console.error("Review not found for ID: ", reviewID);
+        throw new Error("Review not found.");
+      }
+      review.reviewText = reviewText;
+      review.numberOfStars = numberOfStars;
+      await review.save();
+      pubsub.publish('REVIEW_UPDATED', { reviewUpdated: review });
+      return review;
     }
-  },
-  updateReview: async (_, { reviewID, reviewText, numberOfStars }, { db }) => {
-    const review = await db.review.findByPk(reviewID);
-    if (!review) {
-      console.error("Review not found for ID: ", reviewID);
-      throw new Error("Review not found.");
-    }
-    review.reviewText = reviewText;
-    review.numberOfStars = numberOfStars;
-    await review.save();
-    pubsub.publish('REVIEW_UPDATED', { reviewUpdated: review });
-    return review;
   },
 
   //Create subscriptions to indicate if review is updated, flagged or deleted 
