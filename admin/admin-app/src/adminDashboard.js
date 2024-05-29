@@ -276,11 +276,18 @@ function AdminDashboard() {
   const handleNewProductSubmit = async () => {
     try {
       console.log("this is the new product", newProduct);
+  
+      // Ensure price is a float and title is set
       newProduct.price = parseFloat(newProduct.price);
       newProduct.title = newProduct.name;
-
-      await createProduct({ variables: { newProduct } });
+  
+      // Destructure the newProduct to match the variables expected by the mutation
+      const { name, description, title, type, price, isSpecial, img } = newProduct;
+  
+      await createProduct({ variables: { name, description, title, type, price, isSpecial, img } });
       toast.success('New product added successfully!');
+  
+      // Reset form fields after successful creation
       setNewProduct({
         name: '',
         description: '',
@@ -296,7 +303,7 @@ function AdminDashboard() {
       toast.error('Failed to add new product.');
     }
   };
-
+  
   const handleEditProduct = (product) => {
     setEditedProduct(product);
   };
