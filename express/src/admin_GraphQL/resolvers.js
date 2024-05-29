@@ -41,6 +41,31 @@ const resolvers = {
     },
     //Get all of the flagged reviews from the database
     flaggedReviews: (_, __, { db }) => db.review.findAll({ where: { status: 'flagged' } }),
+
+    // Fetch all products from the database
+    products: async (_, __, { db }) => {
+      try {
+        const products = await db.product.findAll();
+        return products;
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        throw new Error("Failed to fetch products");
+      }
+    },
+
+    // Fetch a specific product by its ID
+    product: async (_, { productID }, { db }) => {
+      try {
+        const product = await db.product.findByPk(productID);
+        if (!product) {
+          throw new Error("Product not found.");
+        }
+        return product;
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        throw new Error("Failed to fetch product");
+      }
+    },
   },
   Mutation: {
     //Block/Unblock the user amd save the status to the database
@@ -82,9 +107,50 @@ const resolvers = {
       await review.save();
       pubsub.publish('REVIEW_FLAGGED', { reviewFlagged: review });
       return review;
-    }
-},
+    },
 
+    // Create a new product
+    createProduct: async (_, { name, description, type,title, price, isSpecial, img }, { db }) => {
+      console.log("YAY you got this far");
+      try {
+        const product = await db.product.create({ name, price, isSpecial, img, title, description, type });
+        return product;
+      } catch (error) {
+        console.error("Error creating product:", error);
+        throw new Error("Failed to create product");
+      }
+    },
+
+    // Update an existing product
+    updateProduct: async (_, { productID, name, description, type, price, isSpecial, img }, { db }) => {
+      try {
+        const product = await db.product.findByPk(productID);
+        if (!product) {
+          throw new Error("Product not found.");
+        }
+        await product.update({ name, description, type, price, isSpecial, img });
+        return product;
+      } catch (error) {
+        console.error("Error updating product:", error);
+        throw new Error("Failed to update product");
+      }
+    },
+
+    // Delete a product
+    deleteProduct: async (_, { productID }, { db }) => {
+      try {
+        const product = await db.product.findByPk(productID);
+        if (!product) {
+          throw new Error("Product not found.");
+        }
+        await product.destroy();
+        return product;
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        throw new Error("Failed to delete product");
+      }
+    }
+  },
   //Create subscriptions to indicate if review is updated, flagged or deleted 
   Subscription: {
     reviewUpdated: {

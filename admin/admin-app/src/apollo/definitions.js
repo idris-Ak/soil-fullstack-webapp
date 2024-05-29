@@ -112,3 +112,106 @@ mutation DeleteReview($reviewID: ID!) {
   }
 }
 `;
+
+
+// Query to get all products
+export const GET_PRODUCTS = gql`
+  query {
+    products {
+      productID
+      name
+      description
+      type
+      price
+      isSpecial
+      img
+    }
+  }
+`;
+
+// Query to get a specific product by ID
+export const GET_PRODUCT = gql`
+  query GetProduct($productID: ID!) {
+    product(productID: $productID) {
+      productID
+      name
+      description
+      type
+      price
+      isSpecial
+      img
+    }
+  }
+`;
+
+// Mutation to create a new product
+export const CREATE_PRODUCT = gql`
+  mutation CreateProduct(
+    $name: String!
+    $description: String
+    $title: String
+    $type: String!
+    $price: Float!
+    $isSpecial: Boolean
+    $img: String
+  ) {
+    createProduct(
+      name: $name
+      description: $description
+      title: $title
+      type: $type
+      price: $price
+      isSpecial: $isSpecial
+      img: $img
+    ) {
+      productID
+      name
+      description
+      title
+      type
+      price
+      isSpecial
+      img
+    }
+  }
+`;
+
+// Mutation to update an existing product
+export const UPDATE_PRODUCT = gql`
+  mutation UpdateProduct(
+    $productID: ID!
+    $name: String!
+    $description: String
+    $type: String!
+    $price: Float!
+    $isSpecial: Boolean
+    $img: String
+  ) {
+    updateProduct(
+      productID: $productID
+      name: $name
+      description: $description
+      type: $type
+      price: $price
+      isSpecial: $isSpecial
+      img: $img
+    ) {
+      productID
+      name
+      description
+      type
+      price
+      isSpecial
+      img
+    }
+  }
+`;
+
+// Mutation to delete a product
+export const DELETE_PRODUCT = gql`
+  mutation DeleteProduct($productID: ID!) {
+    deleteProduct(productID: $productID) {
+      productID
+    }
+  }
+`;
