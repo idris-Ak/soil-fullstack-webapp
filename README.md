@@ -26,11 +26,14 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 9. To run the unit tests, navigate to the 'express' folder and run `npm test` in your terminal. 
 
 ## Admin Dashboard
-1. **Review Management**:
+1. **Users Blocking**
+    - The Admin can block or unblock users and when users are blocked, an error message will show up if they try to login to the SOIL website.
+
+2. **Review Management**:
     - The Admin can flag reviews if deemed inappropriate. These reviews will be updated with the message, `[**** This review has been flagged by the admin due to inappropriate content ****]`. The latest three reviews are displayed in a separate box
     with the review text, number of stars and the date the review was created.
 
-2.  **Graphical Metrics**:
+3.  **Graphical Metrics**:
     - **Average Number of Stars For Each Product**: A bar chart that displays the average number of stars for each product based on active reviews. This metric is useful for understanding user engagement and satisfaction with different products.
 
 ### Scenarios Handled

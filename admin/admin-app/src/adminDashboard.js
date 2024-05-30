@@ -412,7 +412,7 @@ return (
                     Stars: {review.numberOfStars}
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
-                    Date: {format(new Date(Number(review.dateCreated)), 'PPP')}
+                    Date Created: {format(new Date(Number(review.dateCreated)), 'PPP')}
                   </Typography>
                   <Box mt={2} display="flex" justifyContent="space-between">
                     <Button variant="contained" color="error" onClick={() => {
