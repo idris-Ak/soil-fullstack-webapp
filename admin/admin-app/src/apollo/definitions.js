@@ -42,6 +42,16 @@ query {
 }
 `;
 
+export const GET_MOST_POPULAR_PRODUCTS = gql`
+  query {
+    mostPopularProducts {
+      productID
+      name
+      count
+    }
+  }
+`;
+
 //Subscription to listen for updates on reviews
 export const SUBSCRIBE_TO_REVIEW_UPDATES = gql`
 subscription {
@@ -215,3 +225,4 @@ export const DELETE_PRODUCT = gql`
     }
   }
 `;
+

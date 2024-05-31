@@ -66,6 +66,33 @@ const resolvers = {
         throw new Error("Failed to fetch product");
       }
     },
+
+    mostPopularProducts: async (_, __, { db }) => {
+
+      try {
+        const result = await db.cartItem.findAll({
+          attributes: ['productID', [db.sequelize.fn('COUNT', db.sequelize.col('productID')), 'count']],
+          group: ['productID'],
+          order: [[db.sequelize.literal('count'), 'DESC']],
+          limit: 10
+        });
+        const products = await db.product.findAll({
+          where: {
+            productID: result.map(item => item.productID)
+          }
+        });
+
+        return result.map(item => ({
+          productID: item.productID,
+          name: products.find(product => product.productID === item.productID).name,
+          count: item.dataValues.count
+        }));
+      } catch (error) {
+        console.error("Error fetching most popular products:", error);
+        throw new Error("Failed to fetch most popular products");
+      }
+    },
+
   },
   Mutation: {
     //Block/Unblock the user amd save the status to the database
@@ -161,7 +188,8 @@ const resolvers = {
       await review.save();
       pubsub.publish('REVIEW_UPDATED', { reviewUpdated: review });
       return review;
-    }
+    },
+
   },
 
   //Create subscriptions to indicate if review is updated, flagged or deleted 

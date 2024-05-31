@@ -6,12 +6,13 @@ import { useQuery, useMutation, useSubscription } from '@apollo/client';
 //Import 'date-fns' to format the dateCreated of the review as there is no 'Date' type in GraphQL
 import { format } from 'date-fns';
 import { GET_LATEST_REVIEWS, GET_ALL_ACTIVE_REVIEWS, SUBSCRIBE_TO_REVIEW_UPDATES, SUBSCRIBE_TO_REVIEW_DELETED, SUBSCRIBE_TO_REVIEW_FLAGGED, MUTATION_TO_REVIEW_FLAGGED, MUTATION_TO_REVIEW_DELETED, 
-MUTATION_TO_USER_STATUS, GET_USERS,  GET_PRODUCTS, CREATE_PRODUCT, UPDATE_PRODUCT, DELETE_PRODUCT} from './apollo/definitions';
+MUTATION_TO_USER_STATUS, GET_USERS,  GET_PRODUCTS, CREATE_PRODUCT, UPDATE_PRODUCT, DELETE_PRODUCT,} from './apollo/definitions';
 import { ToastContainer, toast } from 'react-toastify';
 import BadWordsFilter from 'bad-words';
 import profaneWords from 'profane-words';
 import { Filter as ProfanityFilter } from 'profanity-check';
 import Sentiment from 'sentiment';
+import PopularProductsChart from "./itemPopGraph";
 import 'react-toastify/dist/ReactToastify.css';
 
 const badWordsFilter = new BadWordsFilter({ emptyList: true }); //Reset the filter list
@@ -105,6 +106,7 @@ function AdminDashboard() {
   const { data: reviewUpdatedData } = useSubscription(SUBSCRIBE_TO_REVIEW_UPDATES);
   const { data: reviewDeletedData } = useSubscription(SUBSCRIBE_TO_REVIEW_DELETED);
   const { data: reviewFlaggedData } = useSubscription(SUBSCRIBE_TO_REVIEW_FLAGGED);
+  
 
   const updateAverageRatings = (reviews) => {
     //Calculate the average rating of all the active reviews for each product
@@ -482,10 +484,10 @@ return (
           <Card sx={{ p: 3 }}>
             <CardContent>
               <Typography variant="h5" gutterBottom>Products</Typography>
-              <Grid container spacing={2}>
-                {products.map((product) => (
+              <Grid container spacing={2} sx={{ maxHeight: '600px', overflowY: 'auto' }}>
+                {products.map((product, index) => (
                   <Grid key={product.productID} item xs={12}>
-                    <Card sx={{ p: 2 }}>
+                    <Card sx={{ p: 2 , backgroundColor: index % 2 === 0 ? '#f5f5f5' : '#e0e0e0',}} >
                       <CardContent>
                         <Typography variant="h6">{product.name}</Typography>
                         <Typography>{product.description}</Typography>
@@ -656,6 +658,7 @@ return (
             </Grid>
           </Grid>
         </Box>
+        <PopularProductsChart />
       </Container>
     </ThemeProvider>
   );

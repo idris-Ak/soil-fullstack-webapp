@@ -30,6 +30,12 @@ const typeDefs = gql`
     img: String
   }
 
+  type PopularProduct {
+    productID: ID!
+    name: String!
+    count: Int!
+  }
+
   type Query {
     users: [User]
     latestReviews: [Review]
@@ -37,7 +43,9 @@ const typeDefs = gql`
     flaggedReviews: [Review]
     products: [Product]
     product(productID: ID!): Product
+    mostPopularProducts: [PopularProduct]
   }
+
 
   type Mutation {
     toggleUserStatus(userID: ID!): User
