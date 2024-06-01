@@ -23,15 +23,14 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 6. Start the SOIL frontend code by executing `npm start` in your terminal.
 7. To start the admin dashboard frontend code, go to the 'admin-app' folder by running `cd admin` and then cd `admin-app` in a new terminal.  
 8. Start the admin dashboard frontend code by executing `npm start` in your terminal.
-9. To run the unit tests, navigate to the 'express' folder and run `npm test` in your terminal. 
+9. To run the unit tests, navigate to the appropriate folder with the test files and run `npm test` in your terminal. 
 
 ## Admin Dashboard
 1. **Users Blocking**
     - The Admin can block or unblock users and when users are blocked, an error message will show up if they try to login to the SOIL website.
 
 2. **Review Management**:
-    - The Admin can flag reviews if deemed inappropriate. These reviews will be updated with the message, `[**** This review has been flagged by the admin due to inappropriate content ****]`. The latest three reviews are displayed in a separate box
-    with the review text, number of stars and the date the review was created.
+    - The Admin can flag reviews if deemed inappropriate. These reviews will be updated with the message, `[**** This review has been flagged by the admin due to inappropriate content ****]`. The latest three reviews are displayed in a separate box with the review text, number of stars and the date the review was created. If a review is deleted or flagged by the admin on the dashboard, it will take it out of the dashboard in real time.
 
 3.  **Graphical Metrics**:
     - **Average Number of Stars For Each Product**: A bar chart that displays the average number of stars for each product based on active reviews. This metric is useful for understanding user engagement and satisfaction with different products.
@@ -40,7 +39,7 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 1. **Profanity and Offensive Language**:
     - The 'bad-words', 'profane-words' and 'profanity-check' libraries are used to detect and flag reviews containing offensive language. Multiple libraries that detect offensive content are used to ensure every profane word is accurately detected and dealt with accordingly.
 2. **Negative Sentiment**:
-    - The 'sentiment' library is used to analyze the sentiment of review text. Reviews with a sentiment score below -2 are flagged as potentially inappropriate.
+    - The 'sentiment' library is used to analyze the sentiment of review text. Reviews with a sentiment score below -1 are flagged as potentially inappropriate. A score of -1 was chosen to ensure that any inappropriate review is detected and flagged immediately. A positive score indicates positive sentiment meaning the review is valid and appropriate. Reviews that score a negative sentiment are due to potentially containing inappropriate language or harsh language.
 
 ### Strategies for Handling Inappropriate Content
 1. **Automated Flagging**:
