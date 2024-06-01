@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import './cart.css';
 import { Link} from "react-router-dom";
+import axios from 'axios';
 
 
 function Cart({ cart, addToCart, removeFromCart }) {
+
+  const [products, setProducts] = useState([]);
 
   //this function retuns amount of items in cart
   function cartAmount(){
@@ -30,6 +33,23 @@ function Cart({ cart, addToCart, removeFromCart }) {
     return total;
   }
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const productDetails = [];
+      for (const item of cart) {
+        try {
+          const response = await axios.get(`http://localhost:4000/api/product/${item.productID}`);
+          productDetails.push({ ...response.data, ...item });
+        } catch (error) {
+          console.error(`Error fetching product with ID ${item.productID}:`, error);
+        }
+      }
+      setProducts(productDetails);
+    };
+
+    fetchProducts();
+  }, [cart]);
+
   return (
     <div className="cart-container">
         <div className="card"> {/* Changed class name from "cart-container" to "card" */}
@@ -53,7 +73,7 @@ function Cart({ cart, addToCart, removeFromCart }) {
             <hr className="line" />
           </div>
           {/* Render cart items dynamically */}
-          {cart.map((item, index) => (
+          {products.map((item, index) => (
             <div key={index} className="row border-top border-bottom">
               <div className="row main align-items-center">
                 <div className="col-2"><img className="img-fluid" src={item.img} alt={item.name} /></div> {/* Product image */}

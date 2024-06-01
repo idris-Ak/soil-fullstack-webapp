@@ -8,6 +8,8 @@ module.exports = (express, app) => {
     router.get('/', controller.getAllProducts); 
 
     router.get('/specials', controller.getSpecialProducts);  
+    router.get('/:id', controller.getProduct);
+
 
       // Add routes to server.
       app.use("/api/product", router);

@@ -54,3 +54,22 @@ exports.getSpecialProducts = async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+exports.getProduct = async (req, res) => {
+    //Get a certain product from the database by id
+    
+    const { id } = req.params;
+    try {
+        
+        const product = await db.product.findOne({ 
+            where: {
+                productID: id,
+            },
+        });
+
+        res.json(product);
+    } catch (error) {
+        console.error("Error retrieving product:", id);
+        res.status(500).send({ message: "Error getting product", error: error.message });
+    }
+};

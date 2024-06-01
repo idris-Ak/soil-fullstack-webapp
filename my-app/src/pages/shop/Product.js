@@ -221,7 +221,8 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     
     const handleAddToCart = () => {
         if(isLoggedIn){
-            addToCart(item, quantity); // Add the item to the cart with selected quantity
+            const quan = parseInt(quantity, 10);
+            addToCart(item, quan); // Add the item to the cart with selected quantity
             setShowNotification(true); // Show the notification
             setProductDetails(false); // Close the modal
             setTimeout(() => setShowNotification(false), 4000); // Hide after 4 seconds
@@ -318,7 +319,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                                     <Button variant="outline-secondary" onClick={() => setQuantity(quantity - 1)} disabled={quantity === 1}>-</Button>
                                     <Form.Control type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} className="mx-2" />
                                     <Button variant="outline-secondary" onClick={() => setQuantity(quantity + 1)}>+</Button>
-                                    <Button style={{ marginLeft: '200px', whiteSpace: 'nowrap' }} variant="primary" onClick={handleAddToCart}>Add To Cart</Button>
+                                    <Button style={{ marginLeft: '200px', whiteSpace: 'nowrap' }} variant="primary" onClick={handleAddToCart} >Add To Cart</Button>
                                 </div>
                             </Form.Group>
                         </div>
