@@ -359,7 +359,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
                                 )}
                             </>
                         ) : (
-                        <div style={{ textAlign: 'center', marginTop: '20px', marginBottom: '20px' }}>
+                        <div style={{ textAlign: 'center', marginTop: '50px', marginBottom: '50px' }}>
                             <p>{review.reviewText}</p>
                         </div>
                     )}

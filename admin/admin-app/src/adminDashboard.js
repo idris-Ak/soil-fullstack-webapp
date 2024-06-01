@@ -62,7 +62,7 @@ const theme = createTheme({
 const isInappropriate = (text) => {
   const isProfane = badWordsFilter.isProfane(text) || profanityFilter.isProfane(text);
   const sentimentScore = sentiment.analyze(text).score;
-  return isProfane || sentimentScore < -2;
+  return isProfane || sentimentScore < -1;
 };
 
 function AdminDashboard() {
@@ -220,11 +220,11 @@ function AdminDashboard() {
     }
   };
 
-  const handleFlagReview = async (reviewID) => {
+  const handleFlagReview = async () => {
     try {
-      const response = await flagReview({ variables: { reviewID } });
+      const response = await flagReview({ variables: { reviewID: selectedReview } });
       if (response.data && response.data.flagReview) {
-        setReviews(reviews.map(r => r.reviewID === reviewID ? { ...r, status: response.data.flagReview.status } : r));
+      setReviews(reviews.map(r => r.reviewID === selectedReview ? { ...r, status: response.data.flagReview.status } : r));
         toast.success("Review Flagged Successfully!");
         refetchActiveReviews(); //Refetch the active reviews for to update the graph in real time
         refetchLatestReviews(); //Refetch the latest reviews
@@ -236,6 +236,11 @@ function AdminDashboard() {
       toast.error("Failed to flag review.");
     }
   };
+
+  const handleOpenFlagModal = (reviewID) => {
+  setSelectedReview(reviewID);
+  setFlagModalOpen(true);
+};
   
   // Effect for fetching products
   useEffect(() => {
@@ -423,8 +428,7 @@ return (
                     }}>Delete</Button>
                     {review.reviewText !== "[**** This review has been flagged due to inappropriate content ****]" && (
                     <Button variant="contained" color="primary" onClick={() => {
-                    setSelectedReview(review.reviewID);
-                    setFlagModalOpen(true); 
+                    handleOpenFlagModal(review.reviewID);
                     }}>
                     Flag as Inappropriate
                     </Button>
