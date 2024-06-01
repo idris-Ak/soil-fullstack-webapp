@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js';
 import { GET_MOST_POPULAR_PRODUCTS } from './apollo/definitions';
+import Spinner from 'react-bootstrap/Spinner'; // Assuming you have react-bootstrap installed
 
 // Register the components with Chart.js
 ChartJS.register(
@@ -22,55 +23,49 @@ ChartJS.register(
   Legend
 );
 
+const generateRandomColor = () => {
+  const r = Math.floor(Math.random() * 255);
+  const g = Math.floor(Math.random() * 255);
+  const b = Math.floor(Math.random() * 255);
+  return `rgba(${r}, ${g}, ${b}, 0.6)`;
+};
+
 const PopularProductsChart = () => {
-  const { loading, error, data } = useQuery(GET_MOST_POPULAR_PRODUCTS);
+  const { loading, error, data } = useQuery(GET_MOST_POPULAR_PRODUCTS, {
+    pollInterval: 3000, // Poll every 3 seconds
+  });
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: [
       {
-        label: 'Number of Times Added to Cart',
+        label: 'Items currently most in demand',
         data: [],
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: [],
+        borderColor: [],
         borderWidth: 1,
       },
     ],
   });
 
-  console.log("error:", error);
-  console.log("loading:", loading);
-  console.log("data:", data);
-
   useEffect(() => {
-    console.log("Inside useEffect");
-
     if (data) {
-      console.log("Data is available");
       if (data.mostPopularProducts) {
-        console.log("mostPopularProducts is available");
-        console.log("mostPopularProducts:", data.mostPopularProducts);
-
-        // Map product names and counts
         const productNames = data.mostPopularProducts.map(product => product.name);
         const productCounts = data.mostPopularProducts.map(product => product.count);
-
-        console.log("Product names:", productNames);
-        console.log("Product counts:", productCounts);
+        const colors = productCounts.map(() => generateRandomColor());
 
         setChartData({
           labels: productNames,
           datasets: [
             {
-              label: 'Number of Times Added to Cart',
+              label: 'Items currently most in demand',
               data: productCounts,
-              backgroundColor: 'rgba(75, 192, 192, 0.6)',
-              borderColor: 'rgba(75, 192, 192, 1)',
+              backgroundColor: colors,
+              borderColor: colors.map(color => color.replace('0.6', '1')),
               borderWidth: 1,
             },
           ],
         });
-
-        console.log("Chart data set");
       } else {
         console.error("mostPopularProducts is undefined");
       }
@@ -79,10 +74,42 @@ const PopularProductsChart = () => {
     }
   }, [data]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Spinner animation="border" />;
   if (error) return <p>Error: {error.message}</p>;
 
-  return <Bar data={chartData} />;
+  return (
+    <div style={{ maxWidth: '80%', margin: 'auto' }}>
+      <Bar 
+        data={chartData} 
+        options={{
+          responsive: true,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || '';
+                  if (label) {
+                    label += ': ';
+                  }
+                  if (context.parsed.y !== null) {
+                    label += context.parsed.y;
+                  }
+                  return label;
+                }
+              }
+            },
+            legend: {
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Most Popular Products',
+            },
+          },
+        }}
+      />
+    </div>
+  );
 };
 
 export default PopularProductsChart;

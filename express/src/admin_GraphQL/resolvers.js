@@ -71,9 +71,13 @@ const resolvers = {
 
       try {
         const result = await db.cartItem.findAll({
-          attributes: ['productID', [db.sequelize.fn('COUNT', db.sequelize.col('productID')), 'count']],
+          attributes: [
+            'productID',
+            [db.sequelize.fn('COUNT', db.sequelize.col('productID')), 'count'],
+            [db.sequelize.fn('SUM', db.sequelize.col('quantity')), 'totalQuantity']
+          ],
           group: ['productID'],
-          order: [[db.sequelize.literal('count'), 'DESC']],
+          order: [[db.sequelize.literal('totalQuantity'), 'DESC']],
           limit: 10
         });
         const products = await db.product.findAll({
@@ -85,7 +89,7 @@ const resolvers = {
         return result.map(item => ({
           productID: item.productID,
           name: products.find(product => product.productID === item.productID).name,
-          count: item.dataValues.count
+          count: item.dataValues.totalQuantity
         }));
       } catch (error) {
         console.error("Error fetching most popular products:", error);
@@ -138,7 +142,6 @@ const resolvers = {
 
     // Create a new product
     createProduct: async (_, { name, description, type,title, price, isSpecial, img }, { db }) => {
-      console.log("YAY you got this far");
       try {
         const product = await db.product.create({ name, price, isSpecial, img, title, description, type });
         return product;
