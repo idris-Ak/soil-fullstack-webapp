@@ -124,18 +124,33 @@ function AdminDashboard() {
     return Object.values(averageRatingsByProduct);
   };
 
-  useEffect(() => {
-    //Filter only the active reviews to be displayed on the admin dashboard
-    if (!loading && data) {
-      const filteredReviews = data.latestReviews.filter((review) => review.status === 'active').map((review) => ({
-        ...review,
-        //If the review text is detected to be inappropriate, automatically flag it and display the corresponding text and change the status 
-        reviewText: isInappropriate(review.reviewText) ? "[**** This review has been flagged due to inappropriate content ****]" : review.reviewText,
-        status: isInappropriate(review.reviewText) ? "flagged" : review.status
-      }));
+useEffect(() => {
+  if (!loading && data) {
+    const handleFlagging = async (review) => {
+      //Flag the review automatically if any inappropriate content is detected
+      if (isInappropriate(review.reviewText)) {
+        await flagReview({ variables: { reviewID: review.reviewID } });
+        return false;
+      }
+      return true;
+    };
+
+    //Filter the reviews to only display active reviews on the admin dashboard
+    const filterReviews = async () => {
+      const filteredReviews = [];
+      for (const review of data.latestReviews) {
+        if (review.status === 'active') {
+          const shouldDisplay = await handleFlagging(review);
+          if (shouldDisplay) {
+            filteredReviews.push(review);
+          }
+        }
+      }
       setReviews(filteredReviews);
-    }
-  }, [data, loading]);
+    };
+    filterReviews();
+  }
+  }, [data, loading, flagReview]);
 
   useEffect(() => {
     //If the reviews are updated, then do the same thing as above to display the latest three active reviews 
@@ -156,21 +171,6 @@ function AdminDashboard() {
   useEffect(() => {
   refetchActiveReviews();
   }, [refetchActiveReviews]);
-//   useEffect(() => {
-//     //If the review is deleted then filter it out and remove it from the admin dashboard in real time
-//     if (reviewDeletedData) {
-//       setReviews(prev => prev.filter(review => review.reviewID !== reviewDeletedData.reviewDeleted.reviewID));
-//       refetchActiveReviews(); //Refetch the active reviews for to update the graph in real time
-//     }
-//   }, [reviewDeletedData, refetchActiveReviews]);
-
-//   useEffect(() => {
-//     //If the review is flagged then filter it out and remove it from the admin dashboard in real time
-//     if (reviewFlaggedData) {
-//       setReviews(prev => prev.filter(review => review.reviewID !== reviewFlaggedData.reviewFlagged.reviewID));
-//       refetchActiveReviews(); //Refetch the active reviews for to update the graph in real time
-//     }
-//   }, [reviewFlaggedData, refetchActiveReviews]);
 
   const handleToggleUserStatus = async (userID, currentStatus) => {
     try {
@@ -237,6 +237,7 @@ function AdminDashboard() {
     }
   };
 
+  //Handle the flag confirmation modal
   const handleOpenFlagModal = (reviewID) => {
   setSelectedReview(reviewID);
   setFlagModalOpen(true);
@@ -260,24 +261,6 @@ function AdminDashboard() {
     }));
   };
   
-  const handleConfirmDelete = async () => {
-    try {
-      //Handle deleting reviews from the admin dashboard
-      const response = await deleteReview({ variables: { reviewID: selectedReview } });
-      if (response.data.deleteReview) {
-        const remainingReviews = reviews.filter(r => r.reviewID !== selectedReview);
-        setReviews(remainingReviews);
-        toast.error("Review deleted successfully!");
-        setModalOpen(false);
-        refetchActiveReviews(); //Refetch the active reviews for to update the graph in real time
-        refetchLatestReviews(); //Refetch the latest reviews
-      }
-    } catch (error) {
-      //Display an error message to indicate unsuccessful action
-      console.error("Error deleting review:", error);
-      toast.error("Failed to delete review.");
-    }
-  };
 
   // Function to handle submission of new product
   const handleNewProductSubmit = async () => {
@@ -469,20 +452,6 @@ return (
           </DialogActions>
         </Dialog>
 
-                {/* Deletion Confirmation Dialog */}
-                <Dialog open={modalOpen} onClose={() => setModalOpen(false)}>
-          <DialogTitle>Confirm Deletion</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete this review?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button onClick={handleConfirmDelete} color="error">Delete</Button>
-          </DialogActions>
-        </Dialog>
-  
         {/* Products Card */}
         <Grid item xs={12} md={6}>
           <Card sx={{ p: 3 }}>
