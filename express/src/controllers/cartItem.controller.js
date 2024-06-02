@@ -1,5 +1,6 @@
 const db = require("../database");
 
+//Add items to the cart throught the API and the database
 exports.AddtoCart = async (req, res) => {
     try {
       const { cartID, productID, quantity, price } = req.body;
@@ -19,6 +20,7 @@ exports.AddtoCart = async (req, res) => {
     }
   };
   
+//Delete the items from the cart through the API and the database
 exports.DeleteItemFromCart = async (req, res) => {
     try {
       const { itemId } = req.params;

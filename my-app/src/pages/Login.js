@@ -29,9 +29,9 @@ const handleSubmit = async (event) => {
           setShowSuccessAlert(true);
           setTimeout(() => {
             setShowSuccessAlert(false);
-            //Redirect to profile after alert has been shown for 4 seconds
+            //Redirect to profile after alert has been shown for 3 seconds
             navigate('/MyProfile');
-        }, 4000);
+        }, 3000);
       } 
       else {
           throw new Error('Login unsuccessful');
@@ -40,8 +40,8 @@ const handleSubmit = async (event) => {
       //Handle any errors that occur during login
       setErrorMessage(error.response?.data.message || 'Invalid email or password');
       setShowErrorMessage(true);
-      //Hide error alerts after 4 seconds
-      setTimeout(() => setShowErrorMessage(false), 4000);
+      //Hide error alerts after 3 seconds
+      setTimeout(() => setShowErrorMessage(false), 3000);
       //Reset the password field only after an unsuccessful login attempt
       setUserDetails(prevDetails => ({ ...prevDetails, password: '' }));
   }

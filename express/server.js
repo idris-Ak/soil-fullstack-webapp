@@ -10,7 +10,13 @@ const resolvers = require("./src/admin_GraphQL/resolvers");
 const http = require('http');
 
 // Sync database
-db.sequelize.sync();
+(async () => {
+  try {
+    await db.sync();
+  } catch (error) {
+    console.error("Error syncing the database:", error);
+  }
+})();
 
 const app = express();
 const httpServer = http.createServer(app);
