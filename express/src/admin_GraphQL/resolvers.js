@@ -97,6 +97,44 @@ const resolvers = {
       }
     },
 
+    reviewMetrics: async (_, __, { db }) => {
+      try {
+        const metrics = await db.review.findAll({
+          attributes: [
+            'productID',
+            [db.sequelize.fn('COUNT', db.sequelize.col('reviewID')), 'totalReviews'],
+            [db.sequelize.fn('SUM', db.sequelize.literal('CASE WHEN status = \'flagged\' THEN 1 ELSE 0 END')), 'flaggedReviews'],
+            [db.sequelize.fn('SUM', db.sequelize.literal('CASE WHEN status = \'deleted\' THEN 1 ELSE 0 END')), 'deletedReviews']
+          ],
+          group: ['productID']
+        });
+
+        const products = await db.product.findAll({
+          where: {
+            productID: metrics.map(item => item.productID)
+          }
+        });
+
+        const productMap = products.reduce((acc, product) => {
+          acc[product.productID] = product.name;
+          return acc;
+        }, {});
+    
+        console.log(Object.values(productMap)); // Log only the product names
+    
+        return metrics.map(metric => ({
+          productID: metric.productID,
+          name: productMap[metric.productID], // Add the name attribute
+          totalReviews: metric.dataValues.totalReviews,
+          flaggedReviews: metric.dataValues.flaggedReviews,
+          deletedReviews: metric.dataValues.deletedReviews,
+        }));
+      } catch (error) {
+        console.error("Error fetching review metrics:", error);
+        throw new Error("Failed to fetch review metrics");
+      }
+    },
+
   },
   Mutation: {
     //Block/Unblock the user amd save the status to the database

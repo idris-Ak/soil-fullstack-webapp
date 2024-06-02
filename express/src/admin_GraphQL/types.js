@@ -36,7 +36,16 @@ const typeDefs = gql`
     count: Int!
   }
 
+  type ReviewMetric {
+    productID: ID!
+    name: String
+    totalReviews: Int!
+    flaggedReviews: Int!
+    deletedReviews: Int!
+  }
+  
   type Query {
+    reviewMetrics: [ReviewMetric]
     users: [User]
     latestReviews: [Review]
     allActiveReviews: [Review]
@@ -44,7 +53,7 @@ const typeDefs = gql`
     products: [Product]
     product(productID: ID!): Product
     mostPopularProducts: [PopularProduct]
-  }
+    }
 
 
   type Mutation {

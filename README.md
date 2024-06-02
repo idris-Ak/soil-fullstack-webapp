@@ -34,6 +34,8 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 
 3.  **Graphical Metrics**:
     - **Average Number of Stars For Each Product**: A bar chart that displays the average number of stars for each product based on active reviews. This metric is useful for understanding user engagement and satisfaction with different products.
+    - **Incident Metric FOR Each Product**: The dashboard tracks key metrics such as total reviews, flagged reviews, and deleted reviews. These metrics provide insights into product popularity, review quality, and moderation efforts. This data helps product managers and marketing teams enhance customer satisfaction and product integrity.
+    - ** 
 
 ### Scenarios Handled
 1. **Profanity and Offensive Language**:

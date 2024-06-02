@@ -15,6 +15,18 @@ query {
   }
 `;
 
+export const GET_REVIEW_METRICS = gql`
+  query {
+    reviewMetrics {
+      productID
+      name
+      totalReviews
+      flaggedReviews
+      deletedReviews
+    }
+  }
+`;
+
 //Query to get all of the active reviews
 export const GET_ALL_ACTIVE_REVIEWS = gql`
   query {
