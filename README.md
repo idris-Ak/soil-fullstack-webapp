@@ -9,6 +9,7 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 - More product information and the reviews can be displayed by clicking on the product image or name.
 - The relationships between the tables are in the `index.js` file
 - The reviews have a maximum character limit of 100 characters as per the specifications and the ranking of each star can be seen by hovering over each star. The reviews unit test specifically tests the backend of the SOIL website.
+- The admin dashboard needs the node modules to work.
 
 ## ER Diagram
 - 'NN' stands for 'Not Null' 
