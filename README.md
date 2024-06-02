@@ -7,6 +7,7 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 - When users are prompted to login for the cart and diet planner, they will be redirected to the profile page instead of the cart/diet planner page after successfully logging in, as per the specifications.
 - Images and icons are stored in the public folder.
 - More product information and the reviews can be displayed by clicking on the product image or name.
+- The relationships between the tables are in the `index.js` file
 - The reviews have a maximum character limit of 100 characters as per the specifications and the ranking of each star can be seen by hovering over each star. The reviews unit test specifically tests the backend.
 
 ## ER Diagram
@@ -23,14 +24,15 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 6. Start the SOIL frontend code by executing `npm start` in your terminal.
 7. To start the admin dashboard frontend code, go to the 'admin-app' folder by running `cd admin` and then cd `admin-app` in a new terminal.  
 8. Start the admin dashboard frontend code by executing `npm start` in your terminal.
-9. To run the unit tests, navigate to the appropriate folder with the test files and run `npm test` in your terminal. 
+9. To run the unit tests, navigate to the appropriate folder with the test file, for the reviews it's the file named 'review.controller.test.js' in the 'tests' folder in the 'express' folder and for the products, it's the file named 
+'Cart.test.js in the 'my-app' folder and run `npm test` in your terminal. 
 
 ## Admin Dashboard
 1. **Users Blocking**
-    - The Admin can block or unblock users and when users are blocked, an error message will show up if they try to login to the SOIL website.
+    - The Admin can block or unblock users and when users are blocked, an error message will be displayed if they try to login to the SOIL website.
 
 2. **Review Management**:
-    - The Admin can flag reviews if deemed inappropriate. These reviews will be updated with the message, `[**** This review has been flagged by the admin due to inappropriate content ****]`. The latest three reviews are displayed in a separate box with the review text, number of stars and the date the review was created. If a review is deleted or flagged by the admin on the dashboard, it will take it out of the dashboard in real time.
+    - The Admin can flag reviews if deemed inappropriate. These reviews will be updated with the message, `[**** This review has been flagged by the admin due to inappropriate content ****]`. The latest three reviews are displayed in a separate box with the review text, number of stars and the date the review was created. If a review is deleted or flagged by the admin on the dashboard, it will take it out of the dashboard in real time. The reviews deleted by the admin are stored in the database with the status set to 'deleted' to ensure the review text is displayed on the SOIL website indicating that the review has been deleted by the admin while the reviews deleted by the users are taken out of the database.
 
 3.  **Graphical Metrics**:
     - **Average Number of Stars For Each Product**: A bar chart that displays the average number of stars for each product based on active reviews. This metric is useful for understanding user engagement and satisfaction with different products.

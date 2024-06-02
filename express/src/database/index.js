@@ -11,18 +11,12 @@ db.sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
   dialect: config.DIALECT,
 });
 
-// Include models.
-// exapamples below
-// db.user = require("./models/user.js")(db.sequelize, DataTypes);
 db.user = require("./models/user.js")(db.sequelize, DataTypes);
 db.shoppingCart = require("./models/shoppingCart.js")(db.sequelize, DataTypes);
 db.cartItem = require("./models/cartItem.js")(db.sequelize, DataTypes);
 db.review = require("./models/review.js")(db.sequelize, DataTypes);
 db.follow = require("./models/follow.js")(db.sequelize, DataTypes);
 db.product = require("./models/product.js")(db.sequelize, DataTypes);
-// Relate the models
-// example of post and user below.
-// db.post.belongsTo(db.user, { foreignKey: { name: "username", allowNull: false } });
 db.user.hasOne(db.shoppingCart, { foreignKey: 'userID' });
 db.user.hasMany(db.review, { foreignKey: 'userID', as: 'reviews' });
 db.user.belongsToMany(db.user, {
@@ -51,21 +45,13 @@ db.review.belongsTo(db.user, { foreignKey: 'userID', as: 'user' });
 db.review.belongsTo(db.product, { foreignKey: 'productID' });
 
 
-// Learn more about associations here: https://sequelize.org/master/manual/assocs.html
-
 // Include a sync option with seed data logic included.
 db.sync = async () => {
   // Sync schema.
   try {
-        // Disable foreign key checks
-        // await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
     
         // Sync the database
         await db.sequelize.sync();
-        // await db.sequelize.sync({ alter: true });
-        
-        // Re-enable foreign key checks
-        // await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
         
     
     //Seed the database
@@ -83,13 +69,6 @@ async function seedData() {
     console.log("Product count greater than 0 - no need to addProducts");
     return;
   }
-    
-
-  // below is an example of adding a user
-
-  // const argon2 = require("argon2");
-
-  // let hash = await argon2.hash("abc123", { type: argon2.argon2id });
 
   await db.product.create({ name: 'Organic Apples', price: 4, isSpecial: true, img: 'organic_apples.jpg', title: 'Organic Apples', description: 'Crisp and fresh organic apples.', type: 'Fruits' });
   await db.product.create({ name: 'Organic Carrots', price: 3, isSpecial: false, img: 'organic_carrots.jpg', title: 'Organic Carrots', description: 'Sweet and crunchy organic carrots.', type: 'Vegetables' });
