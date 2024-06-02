@@ -120,7 +120,6 @@ const resolvers = {
           return acc;
         }, {});
     
-        console.log(Object.values(productMap)); // Log only the product names
     
         return metrics.map(metric => ({
           productID: metric.productID,
