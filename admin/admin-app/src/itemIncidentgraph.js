@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useQuery, useSubscription } from '@apollo/client';
 import { GET_REVIEW_METRICS, SUBSCRIBE_TO_REVIEW_UPDATES, SUBSCRIBE_TO_REVIEW_FLAGGED, SUBSCRIBE_TO_REVIEW_DELETED } from './apollo/definitions';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { Card, CardContent, Typography } from '@mui/material';
 
 const ReviewMetrics = () => {
