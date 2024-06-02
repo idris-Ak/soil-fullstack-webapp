@@ -38,6 +38,7 @@ function Cart({ cart, addToCart, removeFromCart }) {
       const productDetails = [];
       for (const item of cart) {
         try {
+          console.log(item)
           const response = await axios.get(`http://localhost:4000/api/product/${item.productID}`);
           productDetails.push({ ...response.data, ...item });
         } catch (error) {

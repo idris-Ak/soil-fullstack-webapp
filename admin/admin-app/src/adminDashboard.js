@@ -12,7 +12,6 @@ import BadWordsFilter from 'bad-words';
 import profaneWords from 'profane-words';
 import { Filter as ProfanityFilter } from 'profanity-check';
 import Sentiment from 'sentiment';
-import PopularProductsChart from "./itemPopGraph";
 import ReviewMetrics from "./itemIncidentgraph"
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -633,7 +632,6 @@ return (
           </Grid>
         </Box>
         <ReviewMetrics />
-        <PopularProductsChart />
       </Container>
     </ThemeProvider>
   );

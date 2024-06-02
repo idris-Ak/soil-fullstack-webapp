@@ -6,7 +6,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.6.8",
+    "axios": "^1.1.0",
     "bootstrap": "^5.3.3",
     "js-cookie": "^3.0.5",
     "react": "^18.2.0",
@@ -18,8 +18,13 @@
     "uuid": "^9.0.1",
     "web-vitals": "^2.1.4"
   },
+  "jest": {
+    "moduleNameMapper": {
+      "^axios$": "axios/dist/node/axios.cjs"
+    }
+  },
   "scripts": {
-    "start": "PORT=3000 react-scripts --openssl-legacy-provider start",
+    "start": "cross-env PORT=3000 react-scripts --openssl-legacy-provider start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -43,6 +48,11 @@
     ]
   },
   "devDependencies": {
-    "cross-env": "^7.0.3"
+    "@babel/core": "^7.24.6",
+    "@babel/preset-env": "^7.24.6",
+    "@babel/preset-react": "^7.24.6",
+    "axios-mock-adapter": "^1.20.0",
+    "cross-env": "^7.0.3",
+    "jest-mock-axios": "^4.7.3"
   }
 }
