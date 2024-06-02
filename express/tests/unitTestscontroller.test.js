@@ -26,17 +26,20 @@ describe('Review Controller', () => {
     });
   });
 
-  afterAll(async () => {
-    // Clean up the test user and product
+ afterAll(async () => {
+  try {
     await db.review.destroy({ where: { reviewID } });
     await db.user.destroy({ where: { id: user.id } });
-    await db.product.destroy({ where: { productID: product.productID } });
-    await db.sequelize.close();
-    // Close the ApolloServer
+    await db.product.destroy({ where: { id: product.productID } });
+  } finally {
+    // Only close the connection and the server after all cleanup tasks have completed
     if (ApolloServer) {
       await ApolloServer.stop();
     }
-  });
+    await db.sequelize.close();
+  }
+});
+
 
   /**
    * Test to ensure that a new review can be successfully created
@@ -53,6 +56,7 @@ describe('Review Controller', () => {
     const response = await request(app).post('/api/review').send(reviewData);
 
     expect(response.status).toBe(200);
+    reviewID = response.body.reviewID; // Make sure to assign reviewID here
     expect(response.body).toHaveProperty('reviewID');
     expect(response.body).toHaveProperty('productID', reviewData.productID);
     expect(response.body).toHaveProperty('reviewText', reviewData.reviewText);
@@ -62,9 +66,6 @@ describe('Review Controller', () => {
     expect(response.body.user).toHaveProperty('id', user.id);
     expect(response.body.user).toHaveProperty('name', user.name);
     expect(response.body).toHaveProperty('isFollowing', false);
-
-    // Store the reviewID for cleanup
-    reviewID = response.body.reviewID;
   });
 
   /**
@@ -167,7 +168,7 @@ describe('CartItem Controller', () => {
 
   beforeAll(async () => {
     // Ensure the database is synchronized before tests
-    await db.sequelize.sync();
+    await db.sequelize.sync(); // Consider the implications of resetting the database here
     // Create a test cart and product
     const newCart = await db.cartItem.create({
       // Create a new cart

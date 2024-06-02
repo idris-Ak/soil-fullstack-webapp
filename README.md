@@ -24,8 +24,7 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 6. Start the SOIL frontend code by executing `npm start` in your terminal.
 7. To start the admin dashboard frontend code, go to the 'admin-app' folder by running `cd admin` and then cd `admin-app` in a new terminal.  
 8. Start the admin dashboard frontend code by executing `npm start` in your terminal.
-9. To run the unit tests, navigate to the appropriate folder with the test file, for the reviews it's the file named 'review.controller.test.js' in the 'tests' folder in the 'express' folder and for the shopping cart, it's the file named 
-'Cart.test.js' in the 'my-app' folder and run `npm test` in your terminal. These shopping cart unit tests specifically test the frontend of the SOIL website.
+9. To run the unit tests, navigate to the 'express' folder and then the 'tests' folder and then run `npm test`.
 
 ## Admin Dashboard
 1. **Users Blocking**
