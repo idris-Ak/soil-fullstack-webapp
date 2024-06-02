@@ -57,6 +57,7 @@ describe('Review Controller', () => {
     const response = await request(app).post('/api/review').send(reviewData);
 
     expect(response.status).toBe(200);
+    reviewID = response.body.reviewID; // Make sure to assign reviewID here
     expect(response.body).toHaveProperty('reviewID');
     expect(response.body).toHaveProperty('productID', reviewData.productID);
     expect(response.body).toHaveProperty('reviewText', reviewData.reviewText);
@@ -66,9 +67,6 @@ describe('Review Controller', () => {
     expect(response.body.user).toHaveProperty('id', user.id);
     expect(response.body.user).toHaveProperty('name', user.name);
     expect(response.body).toHaveProperty('isFollowing', false);
-
-    //Store the reviewID for cleanup
-    reviewID = response.body.reviewID;
   });
 
   /**
@@ -183,3 +181,113 @@ describe('Review Controller', () => {
     expect(responseEmptyStars.body.message).toContain('Missing required fields');
   });
 });
+
+describe('CartItem Controller', () => {
+  let cartID, productID;
+
+  beforeAll(async () => {
+    // Ensure the database is synchronized before tests
+    await db.sequelize.sync(); // Consider the implications of resetting the database here
+    // Create a test cart and product
+    const newCart = await db.cartItem.create({
+      // Create a new cart
+    });
+    cartID = newCart.cartID;
+
+    const newProduct = await db.product.create({
+      // Create a new product
+    });
+    productID = newProduct.productID;
+  });
+
+  afterAll(async () => {
+    // Clean up the test cart and product
+    await db.cartItem.destroy({ where: { cartID } });
+    await db.product.destroy({ where: { productID } });
+    await db.sequelize.close();
+  });
+
+  /**
+   * Test to ensure that a new item can be successfully added to the cart
+   */
+  it('should add a new item to the cart', async () => {
+    const itemData = {
+      cartID,
+      productID,
+      quantity: 1,
+      price:10.00,
+    };
+
+    const response = await request(app)
+      .post('/api/cartItem')
+      .send(itemData);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('message', 'Item added to cart successfully');
+    expect(response.body).toHaveProperty('cartItemID');
+  });
+
+  /**
+   * Test to ensure that an item can be successfully deleted from the cart
+   */
+  it('should delete an item from the cart', async () => {
+    const itemData = {
+      cartID,
+      productID,
+      quantity: 1,
+      price: 10.00,
+    };
+
+    const addItemResponse = await request(app)
+      .post('/api/cartItem')
+      .send(itemData);
+
+    const cartItemID = addItemResponse.body.cartItemID;
+
+    const deleteResponse = await request(app)
+      .delete(`/api/cartItem/${cartItemID}`);
+
+    expect(deleteResponse.status).toBe(200);
+    expect(deleteResponse.body).toHaveProperty('message', 'Item deleted from cart successfully');
+  });
+
+  /**
+   * Test to ensure that an item's quantity can be successfully updated in the cart
+   */
+  it('should update an item\'s quantity in the cart', async () => {
+    const itemData = {
+      cartID,
+      productID,
+      quantity: 1,
+      price: 10.00,
+    };
+
+    const addItemResponse = await request(app)
+      .post('/api/cart')
+      .send(itemData);
+
+    const cartItemID = addItemResponse.body.cartItemID;
+
+    const updatedQuantity = 2;
+
+    const updateResponse = await request(app)
+      .put(`/api/cartItem/${cartItemID}`)
+      .send({ quantity: updatedQuantity });
+
+    expect(updateResponse.status).toBe(200);
+    expect(updateResponse.body.cartItem).toHaveProperty('quantity', updatedQuantity);
+  });
+
+  /**
+   * Test to ensure that cart items can be successfully retrieved
+   */
+  it('should retrieve cart items', async () => {
+    const response = await request(app)
+      .get(`/api/cartItem/${cartID}`);
+
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body.length).toBeGreaterThan(0);
+  });
+});
+
