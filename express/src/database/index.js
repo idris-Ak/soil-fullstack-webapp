@@ -49,11 +49,8 @@ db.review.belongsTo(db.product, { foreignKey: 'productID' });
 db.sync = async () => {
   // Sync schema.
   try {
-    
-        // Sync the database
-        await db.sequelize.sync();
-        
-    
+    // Sync the database
+    await db.sequelize.sync();
     //Seed the database
     await seedData();
   } catch (error) {

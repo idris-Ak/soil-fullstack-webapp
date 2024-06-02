@@ -1,7 +1,7 @@
 import axios from "axios";
 
 
-// retrieve all products from database 
+//Retrieve all products from database 
 const getShopItems = async () => {
   try {
       const result = await axios.get("http://localhost:4000/api/product");
@@ -11,6 +11,7 @@ const getShopItems = async () => {
   }
 }
 
+//Function to assign a cartID to a user
 const initCart = async (User) => {
   if (User == null){
     console.log("user is null")
@@ -47,6 +48,7 @@ const initCart = async (User) => {
   }
 };
 
+//Function to create the cart for the user
 const createCartForUser = async (userId) => {
   try {
     await axios.post("http://localhost:4000/api/shoppingCart", {
@@ -60,7 +62,7 @@ const createCartForUser = async (userId) => {
   }
 };
 
-
+//Function to get the cart items for the specific user
 const returnCart = async (shoppingCartId) => {
   console.log("shoppingCartId is: ",shoppingCartId)
 
@@ -79,6 +81,7 @@ const returnCart = async (shoppingCartId) => {
   }
 };
 
+//Function to get the user's cartID
 const getUserCartID = async (User) => {
   console.log(User.id);
   let id = User.id;
@@ -103,7 +106,7 @@ const getUserCartID = async (User) => {
 };
 
 
-  // Function to retrieve special shop items
+  //Function to retrieve special shop items
   export const getSpecialItems = async () => {
     try {
       const result = await axios.get("http://localhost:4000/api/product/specials");

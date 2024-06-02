@@ -161,6 +161,7 @@ const deleteCartItem = async (itemId) => {
   const loginUser = async (userDetails) => {
     try {
       const response = await axios.post('http://localhost:4000/api/user/Login', userDetails);
+      //If the response status is 200 then set the user id of the current user and the login state to true in local storage
       if (response.status === 200 && response.data.user) {
         const user = response.data.user;
         const userID = user.id;

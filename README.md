@@ -8,7 +8,7 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 - Images and icons are stored in the public folder.
 - More product information and the reviews can be displayed by clicking on the product image or name.
 - The relationships between the tables are in the `index.js` file
-- The reviews have a maximum character limit of 100 characters as per the specifications and the ranking of each star can be seen by hovering over each star. The reviews unit test specifically tests the backend.
+- The reviews have a maximum character limit of 100 characters as per the specifications and the ranking of each star can be seen by hovering over each star. The reviews unit test specifically tests the backend of the SOIL website.
 
 ## ER Diagram
 - 'NN' stands for 'Not Null' 
@@ -24,8 +24,8 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 6. Start the SOIL frontend code by executing `npm start` in your terminal.
 7. To start the admin dashboard frontend code, go to the 'admin-app' folder by running `cd admin` and then cd `admin-app` in a new terminal.  
 8. Start the admin dashboard frontend code by executing `npm start` in your terminal.
-9. To run the unit tests, navigate to the appropriate folder with the test file, for the reviews it's the file named 'review.controller.test.js' in the 'tests' folder in the 'express' folder and for the products, it's the file named 
-'Cart.test.js in the 'my-app' folder and run `npm test` in your terminal. 
+9. To run the unit tests, navigate to the appropriate folder with the test file, for the reviews it's the file named 'review.controller.test.js' in the 'tests' folder in the 'express' folder and for the shopping cart, it's the file named 
+'Cart.test.js' in the 'my-app' folder and run `npm test` in your terminal. These shopping cart unit tests specifically test the frontend of the SOIL website.
 
 ## Admin Dashboard
 1. **Users Blocking**
@@ -47,7 +47,7 @@ https://github.com/rmit-fsd-2024-s1/s4003401-s4005805-a2
 
 ### Strategies for Handling Inappropriate Content
 1. **Automated Flagging**:
-    - Reviews containing profane words or negative sentiment are automatically flagged with a message indicating the review has been flagged by the admin due to inappropriate content but these are not displayed on the admin dashboard as the review is already flagged.
+    - Reviews containing profane words or negative sentiment are automatically flagged with a message indicating the review has been flagged by the admin due to inappropriate content but these are not displayed on the admin dashboard as the review is already flagged and the corresponding message is displayed on the SOIL website. 
 2. **Manual Review Deletion And Flagging**:
     - The admin can manually flag or delete reviews that are deemed inappropriate, irrelevant, or offensive. This allows for handling scenarios that the automated detection might miss, such as hate speech, spam, abusive language and threats to other users.
 
