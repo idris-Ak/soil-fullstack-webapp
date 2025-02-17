@@ -5,10 +5,22 @@ const db = {
   Op: Sequelize.Op
 };
 
-// Create Sequelize.
 db.sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
   host: config.HOST,
   dialect: config.DIALECT,
+  port: config.PORT, // Add port from config.js
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, // Supabase requires this setting
+    },
+  },
+  pool: {
+    max: 10,
+    min: 0,
+    acquire: 30000,
+    idle: 10000,
+  },
 });
 
 db.user = require("./models/user.js")(db.sequelize, DataTypes);
@@ -100,3 +112,9 @@ async function seedData() {
     }
 
 module.exports = db;
+
+db.sync().then(() => {
+  console.log('Database synced and seeded successfully');
+}).catch((error) => {
+  console.error('Error syncing database:', error);
+});
