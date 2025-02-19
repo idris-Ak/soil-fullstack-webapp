@@ -26,8 +26,8 @@ app.use(express.json());
 
 // CORS Middleware
 const allowedOrigins = [
-  "http://localhost:3000" // Frontend local
-  //"https://your-frontend-domain.vercel.app" // Add your Vercel domain later
+  "http://localhost:3000", // Frontend local
+  "https://soil-app.vercel.app/" // Add your Vercel domain later
 ];
 
 // Add CORS suport.
