@@ -16,6 +16,7 @@
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.3",
     "date-fns": "^3.6.0",
+    "dotenv": "^16.4.7",
     "graphql": "^16.8.1",
     "profane-words": "^1.5.11",
     "profanity-check": "^0.0.3",
@@ -32,8 +33,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "set PORT=3001 && react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts build",
+    "start": "PORT=3001 react-scripts start",
+    "build": "react-scripts --openssl-legacy-provider build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
