@@ -59,6 +59,8 @@ const subscriptionServer = SubscriptionServer.create({
 const server = new ApolloServer({
   schema,
   context: () => ({ db }),
+  cache: "bounded", // ✅ Fix caching issue
+  persistedQueries: false, // ✅ Disable unbounded persisted queries
   plugins: [{
     async serverWillStart() {
       return {
@@ -70,6 +72,7 @@ const server = new ApolloServer({
   }],
 });
 
+
 const PORT = process.env.PORT || 4000; // Use Render's assigned port
 
 // Start the server.
@@ -79,9 +82,9 @@ const PORT = process.env.PORT || 4000; // Use Render's assigned port
   httpServer.listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`));
 })();
 
-// Set port, listen for requests.
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
-});
+// // Set port, listen for requests.
+// app.listen(PORT, () => {
+//   console.log(`Server is running on port ${PORT}.`);
+// });
 
 module.exports = { app, ApolloServer: server }; //Export the app and ApolloServer for testing
