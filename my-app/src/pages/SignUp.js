@@ -15,6 +15,7 @@ function SignUp({loginUser}) {
   const[errorMessages, setErrorMessages] = useState([]);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL; // ✅ Read from .env
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -56,7 +57,7 @@ function SignUp({loginUser}) {
   }
 //Try to get connection with the api 
 try{
-  await axios.post('http://localhost:4000/api/user/SignUp', {
+  await axios.post(`${API_URL}/api/user/SignUp`, {
     name: user.name,
     email: user.email,
     password: user.password

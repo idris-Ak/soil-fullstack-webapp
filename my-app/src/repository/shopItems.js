@@ -1,10 +1,11 @@
 import axios from "axios";
+const API_URL = process.env.REACT_APP_API_URL; // ✅ Read from .env
 
 
 //Retrieve all products from database 
 const getShopItems = async () => {
   try {
-      const result = await axios.get("http://localhost:4000/api/product");
+      const result = await axios.get(`${API_URL}/api/product`);
       return result.data;
   } catch (error) {
       console.log("Error fetching data:", error);
@@ -25,7 +26,7 @@ const initCart = async (User) => {
   let id = User.id;
   console.log("initCart: user id of:",id)
   try {
-    const response = await axios.get("http://localhost:4000/api/shoppingCart", {
+    const response = await axios.get(`${API_URL}/api/shoppingCart`, {
       params: {
         userID: id,
       },
@@ -51,7 +52,7 @@ const initCart = async (User) => {
 //Function to create the cart for the user
 const createCartForUser = async (userId) => {
   try {
-    await axios.post("http://localhost:4000/api/shoppingCart", {
+    await axios.post(`${API_URL}/api/shoppingCart`, {
       userID: userId
     });
     console.log("cart created for user", userId)
@@ -67,7 +68,7 @@ const returnCart = async (shoppingCartId) => {
   console.log("shoppingCartId is: ",shoppingCartId)
 
   try {  
-    const response = await axios.get(`http://localhost:4000/api/cartItem/${shoppingCartId}`);
+    const response = await axios.get(`${API_URL}/api/cartItem/${shoppingCartId}`);
 
     if(response.data){
       return response.data;
@@ -86,7 +87,7 @@ const getUserCartID = async (User) => {
   console.log(User.id);
   let id = User.id;
   try {  
-    const response = await axios.get("http://localhost:4000/api/shoppingCart", {
+    const response = await axios.get(`${API_URL}/api/shoppingCart`, {
       params: {
         userID: id,
       },
@@ -109,7 +110,7 @@ const getUserCartID = async (User) => {
   //Function to retrieve special shop items
   export const getSpecialItems = async () => {
     try {
-      const result = await axios.get("http://localhost:4000/api/product/specials");
+      const result = await axios.get(`${API_URL}/api/product/specials`);
       return result.data;
   } catch (error) {
       console.log("Error fetching data:", error);

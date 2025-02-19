@@ -1,13 +1,14 @@
 import { ApolloClient, InMemoryCache, HttpLink, split } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { WebSocketLink } from '@apollo/client/link/ws';
+const API_URL = process.env.REACT_APP_API_URL || "https://soil-fullstack-webapp.onrender.com/graphql";
 
 const httpLink = new HttpLink({
-  uri: 'http://localhost:4001/graphql',
+  uri: API_URL,
 });
 
 const wsLink = new WebSocketLink({
-  uri: `ws://localhost:4001/graphql`,
+  uri: API_URL.replace("https", "wss"), // Convert HTTPS to WSS for WebSockets
   options: {
     reconnect: true
   }

@@ -26,86 +26,88 @@ function App() {
   const [cart, setCart] = useState([]);
   const [cartID, setCartID] = useState(0);
   const [cartItemCount, setCartItemCount] = useState(0);
+  const API_URL = process.env.REACT_APP_API_URL; // ✅ Read from .env
 
 
-const addToCart = async (newItem, amount) => {
-  if (amount === 0) return;
 
-  const cartItem = cart.find(item => item.productID === newItem.productID);
-  
-  if (cartItem) {
-    const updatedQuantity = cartItem.quantity + amount;
-    await updateCartItem(cartItem.cartItemID, updatedQuantity);
-  } else {
-    await addNewItemToCart(newItem, amount);
-  }
-};
+  const addToCart = async (newItem, amount) => {
+    if (amount === 0) return;
 
-const addNewItemToCart = async (item, quantity) => {
-  try {
-    const response = await axios.post("http://localhost:4000/api/cartItem", {
-      cartID: cartID,
-      productID: item.productID,
-      quantity,
-      price: item.price
-    });
-    if (response.status === 200) {
-      setCart([...cart, { ...item, quantity, cartItemID: response.data.cartItemID }]);
-    }
-  } catch (error) {
-    console.error('Error adding item to cart:', error);
-  }
-};
-
-const updateCartItem = async (itemId, quantity) => {
-  try {
-    const response = await axios.put(`http://localhost:4000/api/cartItem/${itemId}`, { quantity });
-    if (response.status === 200) {
-      setCart(cart.map(item => item.cartItemID === itemId ? { ...item, quantity } : item));
-    }
-  } catch (error) {
-    console.error('Error updating cart item:', error);
-  }
-};
-
-const removeFromCart = async (removeItem, amount) => {
-  const updatedCart = cart.reduce((acc, item) => {
-    if (item.cartItemID === removeItem.cartItemID) {
-      const updatedQuantity = item.quantity - amount;
-      if (updatedQuantity > 0) {
-        updateCartItem(item.cartItemID, updatedQuantity);
-        acc.push({ ...item, quantity: updatedQuantity });
-      } else {
-        deleteCartItem(item.cartItemID);
-      }
+    const cartItem = cart.find(item => item.productID === newItem.productID);
+    
+    if (cartItem) {
+      const updatedQuantity = cartItem.quantity + amount;
+      await updateCartItem(cartItem.cartItemID, updatedQuantity);
     } else {
-      acc.push(item);
+      await addNewItemToCart(newItem, amount);
     }
-    return acc;
-  }, []);
-
-  setCart(updatedCart);
-};
-
-const deleteCartItem = async (itemId) => {
-  try {
-    const response = await axios.delete(`http://localhost:4000/api/cartItem/${itemId}`);
-    if (response.status === 200) {
-      setCart(cart.filter(item => item.cartItemID !== itemId));
-    }
-  } catch (error) {
-    console.error('Error deleting cart item:', error);
-  }
-};
-
-
-
-  const removeAllFromCart = async () => {
-    const deletePromises = cart.map(item => deleteCartItem(item.cartItemID));
-    await Promise.all(deletePromises);
-    setCart([]);
-    console.log("removeAll From Cart executed", cart);
   };
+
+  const addNewItemToCart = async (item, quantity) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/cartItem`, {
+        cartID: cartID,
+        productID: item.productID,
+        quantity,
+        price: item.price
+      });
+      if (response.status === 200) {
+        setCart([...cart, { ...item, quantity, cartItemID: response.data.cartItemID }]);
+      }
+    } catch (error) {
+      console.error('Error adding item to cart:', error);
+    }
+  };
+
+  const updateCartItem = async (itemId, quantity) => {
+    try {
+      const response = await axios.put(`${API_URL}/api/cartItem/${itemId}`, { quantity });
+      if (response.status === 200) {
+        setCart(cart.map(item => item.cartItemID === itemId ? { ...item, quantity } : item));
+      }
+    } catch (error) {
+      console.error('Error updating cart item:', error);
+    }
+  };
+
+  const removeFromCart = async (removeItem, amount) => {
+    const updatedCart = cart.reduce((acc, item) => {
+      if (item.cartItemID === removeItem.cartItemID) {
+        const updatedQuantity = item.quantity - amount;
+        if (updatedQuantity > 0) {
+          updateCartItem(item.cartItemID, updatedQuantity);
+          acc.push({ ...item, quantity: updatedQuantity });
+        } else {
+          deleteCartItem(item.cartItemID);
+        }
+      } else {
+        acc.push(item);
+      }
+      return acc;
+    }, []);
+
+    setCart(updatedCart);
+  };
+
+  const deleteCartItem = async (itemId) => {
+    try {
+      const response = await axios.delete(`${API_URL}/api/cartItem/${itemId}`);
+      if (response.status === 200) {
+        setCart(cart.filter(item => item.cartItemID !== itemId));
+      }
+    } catch (error) {
+      console.error('Error deleting cart item:', error);
+    }
+  };
+
+
+
+    const removeAllFromCart = async () => {
+      const deletePromises = cart.map(item => deleteCartItem(item.cartItemID));
+      await Promise.all(deletePromises);
+      setCart([]);
+      console.log("removeAll From Cart executed", cart);
+    };
 
 
   useEffect(() => {
@@ -144,7 +146,7 @@ const deleteCartItem = async (itemId) => {
   useEffect( () => {
     const retrieveUser = async(userID) =>{
       try {
-        const response = await axios.get(`http://localhost:4000/api/user/${userID}`);
+        const response = await axios.get(`${API_URL}/api/user/${userID}`);
           setCurrentUser(response.data);
       } catch (error) {
         console.error('Error deleting cart item:', error);
@@ -155,12 +157,12 @@ const deleteCartItem = async (itemId) => {
     if (userID != null){
       retrieveUser(userID);
     }
-  },[])
+  },[API_URL])
 
 
   const loginUser = async (userDetails) => {
     try {
-      const response = await axios.post('http://localhost:4000/api/user/Login', userDetails);
+      const response = await axios.post(`${API_URL}/api/user/Login`, userDetails);
       //If the response status is 200 then set the user id of the current user and the login state to true in local storage
       if (response.status === 200 && response.data.user) {
         const user = response.data.user;

@@ -21,6 +21,7 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
   const[showAlertDanger, setAlertDanger] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const navigate = useNavigate();
+  const API_URL = process.env.REACT_APP_API_URL; // ✅ Read from .env
 
   useEffect(() => {
     if (!currentUser) {
@@ -108,7 +109,7 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
       newPassword: editDetails.newPassword
     }
     };
-      const response = await axios.patch(`http://localhost:4000/api/user/${currentUser.id}`, updates);
+      const response = await axios.patch(`${API_URL}/api/user/${currentUser.id}`, updates);
       if (response.status === 200) {
       updateCurrentUser(response.data.user);
       setUserDetails(response.data.user);
@@ -146,7 +147,7 @@ function MyProfile({currentUser, updateCurrentUser, logoutUser}) {
      const handleDeleteProfile = async() => {
      try{
       //Try to get connection with api 
-      await axios.delete(`http://localhost:4000/api/user/${currentUser.id}`);
+      await axios.delete(`${API_URL}/api/user/${currentUser.id}`);
       setAlertContent('Profile Successfully Deleted!');
       setShowDeleteConfirm(false);
       setAlert(true);

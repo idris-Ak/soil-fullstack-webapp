@@ -82,9 +82,8 @@ const PORT = process.env.PORT || 4000; // Use Render's assigned port
   httpServer.listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`));
 })();
 
-// // Set port, listen for requests.
-// app.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}.`);
-// });
+app.get("/", (req, res) => {
+  res.send("Welcome to the API! The server is running.");
+});
 
 module.exports = { app, ApolloServer: server }; //Export the app and ApolloServer for testing
