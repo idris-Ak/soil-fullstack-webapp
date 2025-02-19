@@ -70,11 +70,12 @@ const server = new ApolloServer({
   }],
 });
 
+const PORT = process.env.PORT || 4000; // Use Render's assigned port
 
+// Start the server.
 (async function startServer() {
   await server.start();
   server.applyMiddleware({ app });
-  const PORT = process.env.PORT || 4000;
   httpServer.listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`));
 })();
 
