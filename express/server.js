@@ -24,8 +24,19 @@ const httpServer = http.createServer(app);
 // Parse requests of content-type - application/json.
 app.use(express.json());
 
+// CORS Middleware
+const allowedOrigins = [
+  "http://localhost:3000" // Frontend local
+  //"https://your-frontend-domain.vercel.app" // Add your Vercel domain later
+];
+
 // Add CORS suport.
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+  optionsSuccessStatus: 204
+}));
 app.use(express.urlencoded({ extended: true }));
 
 require("./src/routes/user.routes.js")(express, app);
@@ -63,14 +74,13 @@ const server = new ApolloServer({
 (async function startServer() {
   await server.start();
   server.applyMiddleware({ app });
-  const PORT = 10000;
+  const PORT = process.env.PORT || 4000;
   httpServer.listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`));
 })();
 
 // Set port, listen for requests.
-const REST_PORT = 4000;
-app.listen(REST_PORT, () => {
-  console.log(`Server is running on port ${REST_PORT}.`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}.`);
 });
 
 module.exports = { app, ApolloServer: server }; //Export the app and ApolloServer for testing
