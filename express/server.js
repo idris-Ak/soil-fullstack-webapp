@@ -26,8 +26,9 @@ app.use(express.json());
 
 // CORS Middleware
 const allowedOrigins = [
-  "http://localhost:3000", // Frontend local
-  "https://soil-app.vercel.app" // Add your Vercel domain later
+  // "http://localhost:3000", // Frontend local
+  "https://soil-app.vercel.app", // Add your Vercel domain later
+  "https://soil-admin.vercel.app"
 ];
 
 // Add CORS suport.
@@ -37,6 +38,7 @@ app.use(cors({
   credentials: true,
   optionsSuccessStatus: 204
 }));
+
 app.use(express.urlencoded({ extended: true }));
 
 require("./src/routes/user.routes.js")(express, app);
@@ -73,13 +75,26 @@ const server = new ApolloServer({
 });
 
 
+// ✅ **Create WebSocket Server for GraphQL Subscriptions**
+const wsServer = new WebSocketServer({
+  server: httpServer,
+  path: "/graphql",
+});
+
+useServer({ schema, execute, subscribe }, wsServer);
+
+
 const PORT = process.env.PORT || 4000; // Use Render's assigned port
 
 // Start the server.
 (async function startServer() {
   await server.start();
   server.applyMiddleware({ app });
-  httpServer.listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`));
+  httpServer.listen(PORT, () => {
+    console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
+    console.log(`📡 Subscriptions ready at ws://localhost:${PORT}/graphql`);
+  });
+
 })();
 
 app.get("/", (req, res) => {
