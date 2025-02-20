@@ -33,7 +33,13 @@ const allowedOrigins = [
 
 // Add CORS suport.
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   credentials: true,
   optionsSuccessStatus: 204
@@ -75,26 +81,13 @@ const server = new ApolloServer({
 });
 
 
-// ✅ **Create WebSocket Server for GraphQL Subscriptions**
-const wsServer = new WebSocketServer({
-  server: httpServer,
-  path: "/graphql",
-});
-
-useServer({ schema, execute, subscribe }, wsServer);
-
-
 const PORT = process.env.PORT || 4000; // Use Render's assigned port
 
 // Start the server.
 (async function startServer() {
   await server.start();
   server.applyMiddleware({ app });
-  httpServer.listen(PORT, () => {
-    console.log(`🚀 Server ready at http://localhost:${PORT}/graphql`);
-    console.log(`📡 Subscriptions ready at ws://localhost:${PORT}/graphql`);
-  });
-
+  httpServer.listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`));
 })();
 
 app.get("/", (req, res) => {

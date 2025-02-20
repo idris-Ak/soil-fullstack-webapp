@@ -1,18 +1,19 @@
 import { ApolloClient, InMemoryCache, HttpLink, split } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { WebSocketLink } from '@apollo/client/link/ws';
-const API_URL = process.env.REACT_APP_API_URL || "https://soil-fullstack-webapp.onrender.com/graphql";
+const API_URL = process.env.REACT_APP_API_URL?.trim() || "https://soil-fullstack-webapp.onrender.com/graphql";
 
 const httpLink = new HttpLink({
   uri: API_URL,
 });
 
 const wsLink = new WebSocketLink({
-  uri: API_URL.replace("https", "wss"), // Convert HTTPS to WSS for WebSockets
+  uri: API_URL.replace(/^https?/, "wss"), // More reliable conversion
   options: {
     reconnect: true
   }
 });
+
 
 const splitLink = split(
   ({ query }) => {
