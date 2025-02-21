@@ -3,13 +3,19 @@ import { getMainDefinition } from '@apollo/client/utilities';
 import { WebSocketLink } from '@apollo/client/link/ws';
 const API_URL = process.env.REACT_APP_API_URL?.trim() || "https://soil-fullstack-webapp.onrender.com/graphql";
 
+
 const httpLink = new HttpLink({
   uri: API_URL,
 });
 
+const wsUrl = API_URL.replace(/^https?/, "wss");
+
+
 const wsLink = new WebSocketLink({
-  uri: API_URL.replace(/^https?/, "wss"), // for hosting
+  uri: wsUrl, // for hosting
+  // uri: API_URL.replace(/^https?/, "wss"), // for hosting
   // uri: API_URL, // ✅ for local testing 
+
   options: {
     reconnect: true
   }
