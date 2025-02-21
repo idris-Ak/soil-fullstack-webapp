@@ -8,7 +8,8 @@ const httpLink = new HttpLink({
 });
 
 const wsLink = new WebSocketLink({
-  uri: API_URL.replace(/^https?/, "wss"), // More reliable conversion
+  uri: API_URL.replace(/^https?/, "wss"), // for hosting
+  // uri: API_URL, // ✅ for local testing 
   options: {
     reconnect: true
   }

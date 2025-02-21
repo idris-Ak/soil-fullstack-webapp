@@ -28,7 +28,8 @@ app.use(express.json());
 const allowedOrigins = [
   // "http://localhost:3000", // Frontend local
   "https://soil-app.vercel.app", // Add your Vercel domain later
-  "https://soil-admin.vercel.app"
+  "https://soil-admin.vercel.app",
+  "http://localhost:3001"
 ];
 
 // Add CORS suport.
@@ -87,7 +88,8 @@ const PORT = process.env.PORT || 4000; // Use Render's assigned port
 (async function startServer() {
   await server.start();
   server.applyMiddleware({ app });
-  httpServer.listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`));
+  // httpServer.listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`)); // for local testing
+  httpServer.listen(PORT, () => console.log(`GraphQL server running on http://localhost:${PORT}/graphql`)); // for hosting
 })();
 
 app.get("/", (req, res) => {
