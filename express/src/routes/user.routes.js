@@ -1,14 +1,12 @@
-module.exports = (express, app) => {
-  const controller = require("../controllers/user.controller.js");
-  const router = express.Router();
+const { Router } = require('express');
+const controller = require("../controllers/user.controller.js");
+const router = Router();
 
-  // Select add all router methods (get, post, etc)
-  router.post('/SignUp', controller.SignUp);
-  router.post('/Login', controller.Login);
-  router.patch('/:id', controller.updateUser);
-  router.delete('/:id', controller.deleteUser);
-  router.get("/:id",controller.getUser);
+// Select add all router methods (get, post, etc)
+router.post('/SignUp', controller.SignUp);
+router.post('/Login', controller.Login);
+router.get('/:id', controller.getUser);
+router.put('/:id', controller.updateUser);
+router.delete('/:id', controller.deleteUser);
 
-  // Add routes to server.
-  app.use("/api/user", router);
-};
+module.exports = router;

@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+require('dotenv').config(); // MUST be at the top, before using process.env
 const db = require("./src/database");
 const { ApolloServer } = require('apollo-server-express'); //Apollo Server for GraphQL
 const { makeExecutableSchema } = require('@graphql-tools/schema');
@@ -8,6 +9,13 @@ const { SubscriptionServer } = require('subscriptions-transport-ws');
 const typeDefs = require("./src/admin_GraphQL/types");
 const resolvers = require("./src/admin_GraphQL/resolvers");
 const http = require('http');
+
+// Import routes
+const userRoutes = require("./src/routes/user.routes.js");
+const productRoutes = require("./src/routes/product.routes.js");
+const shoppingCartRoutes = require("./src/routes/shoppingCart.routes.js");
+const cartItemRoutes = require("./src/routes/cartItem.routes.js");
+const reviewRoutes = require("./src/routes/review.routes.js");
 
 // Sync database
 (async () => {
@@ -25,12 +33,7 @@ const httpServer = http.createServer(app);
 app.use(express.json());
 
 // CORS Middleware
-const allowedOrigins = [
-  // "http://localhost:3000", // Frontend local
-  "https://soil-app.vercel.app", // Add your Vercel domain later
-  "https://soil-admin.vercel.app",
-  "http://localhost:3001"
-];
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || "").split(",").map(origin => origin.trim()).filter(Boolean);
 
 // Add CORS suport.
 app.use(cors({
@@ -48,11 +51,12 @@ app.use(cors({
 
 app.use(express.urlencoded({ extended: true }));
 
-require("./src/routes/user.routes.js")(express, app);
-require("./src/routes/product.routes.js")(express, app);
-require("./src/routes/shoppingCart.routes.js")(express, app);
-require("./src/routes/cartItem.routes.js")(express, app);
-require("./src/routes/review.routes.js")(express, app);
+// Use routes
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/shopping-cart', shoppingCartRoutes);
+app.use('/api/cart-items', cartItemRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 

@@ -1,9 +1,9 @@
-module.exports = (express, app) => {
-  const controller = require("../controllers/shoppingCart.controller.js");
-  const router = express.Router();
+const { Router } = require('express');
+const controller = require("../controllers/shoppingCart.controller.js");
+const router = Router();
 
-  router.post("/", controller.InitialiseCart);
-  router.get("/", controller.GetCartItems);
+// Select add all router methods (get, post, etc)
+router.post("/", controller.InitialiseCart);
+router.get("/", controller.GetCartItems);
 
-  app.use("/api/shoppingCart", router);
-};
+module.exports = router;

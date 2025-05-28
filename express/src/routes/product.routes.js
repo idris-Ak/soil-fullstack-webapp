@@ -1,17 +1,11 @@
-module.exports = (express, app) => {
-    const controller = require("../controllers/product.controller.js");
-    const router = express.Router();
-  
-    router.post('/', controller.addProduct);
+const { Router } = require('express');
+const controller = require("../controllers/product.controller.js");
+const router = Router();
 
-    // GET request to fetch all products
-    router.get('/', controller.getAllProducts); 
+// Select add all router methods (get, post, etc)
+router.post('/', controller.addProduct);
+router.get('/', controller.getAllProducts);
+router.get('/specials', controller.getSpecialProducts);
+router.get('/:id', controller.getProduct);
 
-    router.get('/specials', controller.getSpecialProducts);  
-    router.get('/:id', controller.getProduct);
-
-
-      // Add routes to server.
-      app.use("/api/product", router);
-  
-  };
+module.exports = router;

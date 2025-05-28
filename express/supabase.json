@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "functions": {
+    "api": {
+      "entrypoint": "server.js",
+      "runtime": "nodejs18"
+    }
+  }
+} 

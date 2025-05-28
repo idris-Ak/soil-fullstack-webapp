@@ -5,22 +5,22 @@ const db = {
   Op: Sequelize.Op
 };
 
-db.sequelize = new Sequelize(config.DB, config.USER, config.PASSWORD, {
-  host: config.HOST,
-  dialect: config.DIALECT,
-  port: config.PORT || 10000, // Add port from config.js
+// Use connection string for more reliable connection
+db.sequelize = new Sequelize(config.DATABASE_URL, {
+  dialect: 'postgres',
   dialectOptions: {
     ssl: {
       require: true,
-      rejectUnauthorized: false, // Supabase requires this setting
+      rejectUnauthorized: false,
     },
   },
   pool: {
     max: 10,
     min: 0,
     acquire: 30000,
-    idle: 10000,
+    idle: 10000
   },
+  logging: false // Set to console.log to see SQL queries
 });
 
 db.user = require("./models/user.js")(db.sequelize, DataTypes);
@@ -109,7 +109,7 @@ async function seedData() {
   await db.product.create({ name: 'Organic Garlic', price: 2, isSpecial: false, img: 'organic_garlic.jpg', title: 'Organic Garlic', description: 'Aromatic and healthful organic garlic.', type: 'Vegetables' });
   await db.product.create({ name: 'Organic Lettuce', price: 3, isSpecial: false, img: 'organic_lettuce.jpg', title: 'Organic Lettuce', description: 'Crisp and refreshing organic lettuce.', type: 'Vegetables' });
   await db.product.create({ name: 'Organic Mushrooms', price: 4, isSpecial: false, img: 'organic_mushrooms.jpg', title: 'Organic Mushrooms', description: 'Nutrient-rich organic mushrooms, perfect for various dishes.', type: 'Vegetables' });
-    }
+}
 
 module.exports = db;
 
