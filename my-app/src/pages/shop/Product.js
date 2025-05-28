@@ -34,7 +34,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         }
         try {
             //Get the reviews from the database while fetching the currentUserID for the followers functionality 
-            const response = await axios.get(`${API_URL}/api/review/${item.productID}`, {
+            const response = await axios.get(`${API_URL}/api/reviews/${item.productID}`, {
                 params: {  currentUserID: currentUser ? currentUser.id : null, page: currentPage, limit: reviewsPerPage, sort: sort }
             });
             //Set the reviews
@@ -77,7 +77,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         //Check if the review is between 1-100 characters
         if (newReview.length > 0 && newReview.length <= 100 && rating > 0) {
             //Fetch reviews based upon if the user is editing the review or not
-            const endpoint = edit ? `${API_URL}/api/review/${editReviewID}` : `${API_URL}/api/review`;
+            const endpoint = edit ? `${API_URL}/api/reviews/${editReviewID}` : `${API_URL}/api/reviews`;
             const method = edit ? 'put' : 'post';
             try{
                 const response = await axios[method](endpoint, reviewData);
@@ -135,11 +135,11 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
     const handleDeleteReview = async(reviewID) => {
         try{
             //Delete the review from the database
-            const response = await axios.delete(`${API_URL}/api/review/${reviewID}`);
+            const response = await axios.delete(`${API_URL}/api/reviews/${reviewID}`);
             //If the response status is successful then filter out the deleted reviews from the current reviews
             if (response.status === 200) {
             //Fetch current reviews again to update state correctly
-            const updatedResponse = await axios.get(`${API_URL}/api/review/${item.productID}`, {
+            const updatedResponse = await axios.get(`${API_URL}/api/reviews/${item.productID}`, {
                 params: { currentUserID: currentUser ? currentUser.id : null, page: 1, limit: reviewsPerPage, sort: sortOrder }
             });
             if (updatedResponse.data) {
@@ -184,7 +184,7 @@ export const Product = ({ item, addToCart, isLoggedIn, currentUser }) => {
         const toggleFollow = async () => {
           //Handle users either following or unfollowing other users 
           const method = isFollowing ? 'delete' : 'post';
-          const endpoint = `${API_URL}/api/review/follow/${review.userID}`;
+          const endpoint = `${API_URL}/api/reviews/follow/${review.userID}`;
           try {
             await axios({
               method: method,

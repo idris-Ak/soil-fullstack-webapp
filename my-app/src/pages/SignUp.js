@@ -57,7 +57,7 @@ function SignUp({loginUser}) {
   }
 //Try to get connection with the api 
 try{
-  await axios.post(`${API_URL}/api/user/SignUp`, {
+  await axios.post(`${API_URL}/api/users/SignUp`, {
     name: user.name,
     email: user.email,
     password: user.password

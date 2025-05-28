@@ -22,9 +22,10 @@ function Home() {
     const fetchData = async () => {
       try {
         const specials = await getSpecialItems();
-        setSpecialItems(specials);
+        setSpecialItems(specials || []); // Set to empty array if specials is undefined
       } catch (error) {
         console.log("Error fetching special items:", error);
+        setSpecialItems([]); // Set to empty array on error
       }
     };
   
@@ -107,16 +108,22 @@ function Home() {
           <Carousel.Item>
             <h2 className="mb-4" style={{textAlign: 'center', marginBottom: '30px', fontSize: '2.5rem', color: '#5C832F', fontFamily: 'Roboto, sans-serif' }}>Featured Specials</h2>
             <div className="d-flex justify-content-center">
-              { specialItems.slice(0, 4).map(special => (
-                <Card style={{ width: '18rem', margin: '0 10px',  height: '300px' }} key={special.productID}>
-                  <Card.Img variant="top" src={special.img} style={{ height: '140px', objectFit: 'cover' }} />
-                  <Card.Body>
-                    <Card.Title style={{ color: '#5C832F', fontWeight: 'bold', fontFamily: 'Open Sans, sans-serif',  marginBottom: '10px'}}>{special.name}</Card.Title>
-                    <Card.Text style={{fontSize: '1.3rem', color: '#007bff', fontWeight: 500, fontFamily: 'Open Sans, sans-serif'}}>${special.price}</Card.Text>
-                    <Button variant="success" onClick={navigateToSpecials}>Shop Now</Button>
-                  </Card.Body>
-                </Card>
-              ))}
+              { specialItems && specialItems.length > 0 ? (
+                specialItems.slice(0, 4).map(special => (
+                  <Card style={{ width: '18rem', margin: '0 10px',  height: '300px' }} key={special.productID}>
+                    <Card.Img variant="top" src={special.img} style={{ height: '140px', objectFit: 'cover' }} />
+                    <Card.Body>
+                      <Card.Title style={{ color: '#5C832F', fontWeight: 'bold', fontFamily: 'Open Sans, sans-serif',  marginBottom: '10px'}}>{special.name}</Card.Title>
+                      <Card.Text style={{fontSize: '1.3rem', color: '#007bff', fontWeight: 500, fontFamily: 'Open Sans, sans-serif'}}>${special.price}</Card.Text>
+                      <Button variant="success" onClick={navigateToSpecials}>Shop Now</Button>
+                    </Card.Body>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center w-100">
+                  <p>No special items available at the moment.</p>
+                </div>
+              )}
             </div>
           </Carousel.Item>
 

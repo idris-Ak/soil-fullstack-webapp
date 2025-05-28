@@ -5,7 +5,7 @@ const API_URL = process.env.REACT_APP_API_URL; // ✅ Read from .env
 //Retrieve all products from database 
 const getShopItems = async () => {
   try {
-      const result = await axios.get(`${API_URL}/api/product`);
+      const result = await axios.get(`${API_URL}/api/products`);
       return result.data;
   } catch (error) {
       console.log("Error fetching data:", error);
@@ -26,7 +26,7 @@ const initCart = async (User) => {
   let id = User.id;
   console.log("initCart: user id of:",id)
   try {
-    const response = await axios.get(`${API_URL}/api/shoppingCart`, {
+    const response = await axios.get(`${API_URL}/api/shopping-cart`, {
       params: {
         userID: id,
       },
@@ -52,7 +52,7 @@ const initCart = async (User) => {
 //Function to create the cart for the user
 const createCartForUser = async (userId) => {
   try {
-    await axios.post(`${API_URL}/api/shoppingCart`, {
+    await axios.post(`${API_URL}/api/shopping-cart`, {
       userID: userId
     });
     console.log("cart created for user", userId)
@@ -68,7 +68,7 @@ const returnCart = async (shoppingCartId) => {
   console.log("shoppingCartId is: ",shoppingCartId)
 
   try {  
-    const response = await axios.get(`${API_URL}/api/cartItem/${shoppingCartId}`);
+    const response = await axios.get(`${API_URL}/api/cart-items/${shoppingCartId}`);
 
     if(response.data){
       return response.data;
@@ -87,7 +87,7 @@ const getUserCartID = async (User) => {
   console.log(User.id);
   let id = User.id;
   try {  
-    const response = await axios.get(`${API_URL}/api/shoppingCart`, {
+    const response = await axios.get(`${API_URL}/api/shopping-cart`, {
       params: {
         userID: id,
       },
@@ -110,7 +110,7 @@ const getUserCartID = async (User) => {
   //Function to retrieve special shop items
   export const getSpecialItems = async () => {
     try {
-      const result = await axios.get(`${API_URL}/api/product/specials`);
+      const result = await axios.get(`${API_URL}/api/products/specials`);
       return result.data;
   } catch (error) {
       console.log("Error fetching data:", error);

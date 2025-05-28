@@ -45,7 +45,7 @@ function App() {
 
   const addNewItemToCart = async (item, quantity) => {
     try {
-      const response = await axios.post(`${API_URL}/api/cartItem`, {
+      const response = await axios.post(`${API_URL}/api/cart-items`, {
         cartID: cartID,
         productID: item.productID,
         quantity,
@@ -61,7 +61,7 @@ function App() {
 
   const updateCartItem = async (itemId, quantity) => {
     try {
-      const response = await axios.put(`${API_URL}/api/cartItem/${itemId}`, { quantity });
+      const response = await axios.put(`${API_URL}/api/cart-items/${itemId}`, { quantity });
       if (response.status === 200) {
         setCart(cart.map(item => item.cartItemID === itemId ? { ...item, quantity } : item));
       }
@@ -91,7 +91,7 @@ function App() {
 
   const deleteCartItem = async (itemId) => {
     try {
-      const response = await axios.delete(`${API_URL}/api/cartItem/${itemId}`);
+      const response = await axios.delete(`${API_URL}/api/cart-items/${itemId}`);
       if (response.status === 200) {
         setCart(cart.filter(item => item.cartItemID !== itemId));
       }
@@ -146,7 +146,7 @@ function App() {
   useEffect( () => {
     const retrieveUser = async(userID) =>{
       try {
-        const response = await axios.get(`${API_URL}/api/user/${userID}`);
+        const response = await axios.get(`${API_URL}/api/users/${userID}`);
           setCurrentUser(response.data);
       } catch (error) {
         console.error('Error deleting cart item:', error);
@@ -162,7 +162,7 @@ function App() {
 
   const loginUser = async (userDetails) => {
     try {
-      const response = await axios.post(`${API_URL}/api/user/Login`, userDetails);
+      const response = await axios.post(`${API_URL}/api/users/Login`, userDetails);
       //If the response status is 200 then set the user id of the current user and the login state to true in local storage
       if (response.status === 200 && response.data.user) {
         const user = response.data.user;
